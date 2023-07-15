@@ -1,24 +1,27 @@
 use log::info;
-use warp::reply::json;
 use warp::{Filter, Reply};
+use warp::reply::json;
 
+use crate::{models, utils};
 use crate::fractal::{calc_multi_threaded, calc_single_threaded};
 use crate::models::Request;
-use crate::{models, utils};
 
-pub fn routes() -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
+pub fn routes() -> impl Filter<Extract=(impl warp::Reply, ), Error=warp::Rejection> + Clone {
     let server_source = warp::path!("api" / "singlethreaded");
     let single_threaded = server_source
         .and(warp::post())
         .and(warp::body::json())
-        .and_then(|req: Request| handle_request_single_threaded(req));
+        .and_then(|req: Request| {
+            info!("POST api/singlethreaded");
+            handle_request_single_threaded(req)
+        });
 
     let server_source = warp::path!("api" / "multithreaded");
     let multi_threaded = server_source
         .and(warp::post())
         .and(warp::body::json())
         .and_then(|req| {
-            // info!("POST proxythingi/server/source");
+            info!("POST api/multithreaded");
             handle_request_multi_threaded(req)
         });
 
@@ -27,7 +30,7 @@ pub fn routes() -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Reje
         .and(warp::post())
         .and(warp::body::json())
         .and_then(|req| {
-            // info!("POST proxythingi/server/source");
+            info!("POST api/rayon");
             handle_request_single_threaded(req)
         });
 
@@ -36,7 +39,7 @@ pub fn routes() -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Reje
         .and(warp::post())
         .and(warp::body::json())
         .and_then(|req| {
-            // info!("POST proxythingi/server/source");
+            info!("POST api/crossbeamtiles");
             handle_request_single_threaded(req)
         });
 

@@ -88,6 +88,7 @@ pub struct Hsl {
 }
 
 #[derive(Deserialize, Serialize, Clone, PartialEq)]
+#[derive(Default)]
 pub struct Color {
     pub(crate) r: u8,
     pub(crate) g: u8,
@@ -131,11 +132,7 @@ pub fn color16() -> Vec<Color> {
     v
 }
 
-impl Default for Color {
-    fn default() -> Self {
-        Color { r: 0, b: 0, g: 0 }
-    }
-}
+
 
 impl Debug for Color {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
