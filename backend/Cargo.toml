@@ -13,14 +13,13 @@ tokio = { version = "1.28.2", features = ["fs", "sync", "time"] }
 lazy_static = "1.4.0"
 futures = { version = "0.3.28" }
 futures-util = { version = "0.3.28" }
-chrono = { version = "0.4.24", features = ["serde"] }
-dotenvy = "0.15.7"
-serde = { version = "1.0.160", features = ["derive"] }
+chrono = { version = "0.4.26", features = ["serde"] }
+serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"
-serde_urlencoded = "0.7.1"
-serde_derive = "1.0.160"
+serde_derive = "1.0.163"
 image = "0.24.6"
 num_cpus = "1.15.0"
+rayon = "1.7.0"
 
 [dev-dependencies]
 tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }

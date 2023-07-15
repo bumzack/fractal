@@ -2,7 +2,7 @@ use log::info;
 use warp::reply::json;
 use warp::{Filter, Reply};
 
-use crate::fractal::{calc_multi_threaded, calc_single_threaded};
+use crate::fractal::{calc_multi_threaded, calc_rayon, calc_single_threaded};
 use crate::models::Request;
 use crate::{models, utils};
 
@@ -31,7 +31,7 @@ pub fn routes() -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Reje
         .and(warp::body::json())
         .and_then(|req| {
             info!("POST api/rayon");
-            handle_request_single_threaded(req)
+            handle_request_rayon(req)
         });
 
     let server_source = warp::path!("api" / "crossbeamtiles");
@@ -69,13 +69,33 @@ pub async fn handle_request_multi_threaded(req: Request) -> utils::Result<impl R
 
     let response = models::Response {
         duration: format!(
-            "calculation  multi_threaded threaded took {:0.2} ms using {}",
+            "calculation  multi_threaded using plain threads  took {:0.2} ms using {}",
             duration, cores
         ),
         fractal,
     };
     let res = json(&response);
 
-    info!("calculation single threaded took {:0.2} ms", duration);
+    info!(
+        "calculation multi_threaded  using plain threads  took {:0.2} ms",
+        duration
+    );
+    Ok(res)
+}
+
+pub async fn handle_request_rayon(req: Request) -> utils::Result<impl Reply> {
+    let (fractal, duration) =
+        calc_rayon(&req.z1, &req.z2, req.width, req.max_iterations, req.colors);
+
+    let response = models::Response {
+        duration: format!("calculation  rayon threaded took {:0.2} ms", duration,),
+        fractal,
+    };
+    let res = json(&response);
+
+    info!(
+        "calculation multi threaded with rayon took {:0.2} ms",
+        duration
+    );
     Ok(res)
 }

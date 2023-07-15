@@ -9,6 +9,7 @@ mod complex;
 mod fractal;
 mod fractal_image;
 mod models;
+mod rayon_image;
 mod server;
 mod utils;
 
