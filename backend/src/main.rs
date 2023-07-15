@@ -12,6 +12,8 @@ mod models;
 mod rayon_image;
 mod server;
 mod utils;
+mod image_tile;
+mod index_html;
 
 // #[tokio::main(worker_threads = 2)]
 #[tokio::main]

@@ -17,7 +17,7 @@ pub fn save_png(pixels: &[Color], width: u32, height: u32) {
 
     for p in pixels.iter() {
         let pixel = image::Rgb([p.r, p.g, p.b]);
-        // println!("pixels_vec = {:?}, pixel = {:?}", p, pixel);
+        // info!("pixels_vec = {:?}, pixel = {:?}", p, pixel);
         image.put_pixel(x, y as u32, pixel);
         x += 1;
         if x % width == 0 {

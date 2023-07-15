@@ -10,6 +10,8 @@ pub struct Request {
     pub width: u32,
     pub max_iterations: u32,
     pub colors: u32,
+    pub x_tiles: u32,
+    pub y_tiles: u32,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug, Default, PartialEq)]

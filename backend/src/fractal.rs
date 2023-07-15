@@ -2,13 +2,15 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Instant;
 
+use crossbeam_channel::Sender;
 use log::{error, info};
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelRefMutIterator;
 
-use crate::color::{color16, color256, Color, BLACK};
+use crate::color::{BLACK, Color, color16, color256};
 use crate::complex::ComplexNumber;
 use crate::fractal_image::FractalImage;
+use crate::image_tile::{TileData, TileDataPoint, tiles};
 use crate::rayon_image::Pixel;
 use crate::utils::save_png;
 
@@ -97,6 +99,7 @@ pub fn calc_single_threaded(
     (fractal, duration)
 }
 
+#[allow(dead_code)]
 pub fn calc_multi_threaded_slow(
     z1: &ComplexNumber,
     z2: &ComplexNumber,
@@ -357,6 +360,118 @@ pub fn calc_multi_threaded(
 
     (fractal, duration, cores)
 }
+
+pub fn calc_multi_threaded_crossbeam_tiles(
+    z1: &ComplexNumber,
+    z2: &ComplexNumber,
+    width: u32,
+    max_iterations: u32,
+    colors: u32,
+    x_tiles: u32,
+    y_tiles: u32,
+    sender: Sender<TileData>,
+) {
+    let cores = num_cpus::get() - 2;
+
+    let start = Instant::now();
+
+    let x_diff = z1.a.abs() + z2.a.abs();
+    let y_diff = z1.b.abs() + z2.b.abs();
+
+    // x_diff : y_diff = width : height
+    // height = x_diff*width / y_diff
+    let height = (x_diff * width as f32 / y_diff).round() as u32;
+
+    let x_delta = x_diff / width as f32;
+    let y_delta = y_diff / height as f32;
+
+    info!("x_diff {},  y_diff {},   x_delta {},   y_delta {}   width {}  height {},  max_iterations {}",x_diff, y_diff, x_delta, y_delta, width,  height, max_iterations);
+
+    let tiles = tiles(width, height, x_tiles, y_tiles);
+    let tiles = Arc::new(Mutex::new(tiles));
+
+    crossbeam::scope(|s| {
+        let mut children = vec![];
+
+        for _ in 0..cores {
+            let sender_thread = sender.clone();
+            let cloned_tiles = Arc::clone(&tiles);
+            let colors: Vec<Color> = match colors {
+                16 => color16(),
+                256 => color256(),
+                _ => panic!("number of colors not supported {}", colors),
+            };
+
+            children.push(s.spawn(move |_| {
+                let mut cnt_tiles = 0;
+
+                while cloned_tiles.lock().unwrap().peekable().peek().is_some() {
+                    let tile_candidate;
+                    {
+                        tile_candidate = cloned_tiles.lock().unwrap().next();
+                    }
+                    match tile_candidate {
+                        Some(ref tile) => {
+                            let mut pixels = vec![];
+
+                            cnt_tiles += 1;
+                            for y in tile.y_from()..tile.y_to() {
+                                for x in tile.x_from()..tile.x_to() {
+                                    // info!("thread_id {:?}   raytracing pixel:  {}/{} ", thread::current().id(), x, y);
+                                    let c = calc_fractal_color(x as u32, y as u32, z1, x_delta, y_delta, max_iterations, &colors);
+                                    let tile_data_point = TileDataPoint::new(x, y, c);
+                                    pixels.push(tile_data_point);
+                                }
+                            }
+
+                            let tile_data = TileData::new(tile.get_idx(), pixels);
+                            let idx = tile_data.get_idx();
+                            match sender_thread.send(tile_data) {
+                                Ok(_) => {
+                                    info!("calc_multi_threaded_crossbeam_tiles:  sending  tile idx {}", idx);
+                                }
+                                Err(e) => {
+                                    info!("calc_multi_threaded_crossbeam_tiles:  error sending a tile    {:?}", e);
+                                }
+                            };
+                        }
+                        None => {
+                            info!(" no more tiles for thread {:?}", thread::current().id());
+                        }
+                    };
+                }
+
+                (thread::current().id(), cnt_tiles)
+            }));
+        }
+
+        for child in children {
+            let dur = start.elapsed().as_micros();
+            let (thread_id, cnt_tiles) = child.join().unwrap();
+            info!(
+                "child thread {:?} finished. run for {} ms , processed {:?} tiles",
+                thread_id, dur, cnt_tiles
+            );
+        }
+        let duration = start.elapsed().as_millis();
+        info!("duration {} ms", duration);
+    })
+        .expect("TODO: something went wrong");
+}
+
+// pub fn collect_tiles_to_canvas(r: Receiver<TileData>, width: usize, height: usize) -> FractalImage {
+//     // let mut canvas = Canvas::new(width, height);
+//     //
+//     // r.iter().for_each(|tile_data| {
+//     //     //  info!("collect_tiles_to_canvas   got a tile idx {}", tile_data.get_idx());
+//     //     tile_data.get_points().iter().for_each(|p| {
+//     //         canvas.write_pixel(p.get_x(), p.get_y(), p.get_color());
+//     //     })
+//     // });
+//
+//     FractalImage::default()
+// }
+
 
 pub fn calc_rayon(
     z1: &ComplexNumber,
