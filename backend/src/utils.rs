@@ -13,12 +13,12 @@ pub fn save_png(pixels: &[Color], width: u32, height: u32) {
     let start = Instant::now();
     let mut x = 0;
     let mut y = 0;
-    let mut image: RgbImage = ImageBuffer::new(width as u32, height as u32);
+    let mut image: RgbImage = ImageBuffer::new(width, height);
 
     for p in pixels.iter() {
         let pixel = image::Rgb([p.r, p.g, p.b]);
         // println!("pixels_vec = {:?}, pixel = {:?}", p, pixel);
-        image.put_pixel(x as u32, y as u32, pixel);
+        image.put_pixel(x, y as u32, pixel);
         x += 1;
         if x % width == 0 {
             y += 1;

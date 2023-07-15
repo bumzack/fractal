@@ -401,7 +401,7 @@ pub fn calc_rayon(
     pixels.par_iter_mut().for_each(|p| {
         let x = p.x;
         let y = p.y;
-        let color = calc_fractal_color(x, y, &z1, x_delta, y_delta, max_iterations, &colors);
+        let color = calc_fractal_color(x, y, z1, x_delta, y_delta, max_iterations, &colors);
         p.color = color;
     });
 
