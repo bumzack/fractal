@@ -20,6 +20,7 @@ serde_json = "1.0.96"
 serde_urlencoded = "0.7.1"
 serde_derive = "1.0.160"
 image = "0.24.6"
+num_cpus = "1.15.0"
 
 [dev-dependencies]
 tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }

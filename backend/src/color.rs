@@ -70,7 +70,6 @@ pub const WHITE: Color = Color {
     b: 255,
 };
 
-
 #[derive(Deserialize, Serialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct FileColor {
@@ -95,12 +94,11 @@ pub struct Color {
     pub(crate) b: u8,
 }
 
-
 pub fn color256() -> Vec<Color> {
-    let data = fs::read_to_string("./256-colors.json")
-        .expect("Unable to read file");
+    let data = fs::read_to_string("./256-colors.json").expect("Unable to read file");
     let colors: Vec<FileColor> = serde_json::from_str(&data).expect("JSON was not well-formatted");
-    let cs: Vec<Color> = colors.iter()
+    let cs: Vec<Color> = colors
+        .iter()
         .map(|c| Color {
             r: c.rgb.r,
             g: c.rgb.g,

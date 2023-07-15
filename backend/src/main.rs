@@ -1,17 +1,16 @@
 use log::{info, LevelFilter};
 use pretty_env_logger::env_logger::{Builder, Target};
-use warp::{Filter};
+use warp::Filter;
 
 use crate::server::routes;
 
 mod color;
 mod complex;
+mod fractal;
 mod fractal_image;
 mod models;
-mod utils;
 mod server;
-mod fractal;
-
+mod utils;
 
 // #[tokio::main(worker_threads = 2)]
 #[tokio::main]

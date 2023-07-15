@@ -1,14 +1,15 @@
 use chrono::Utc;
+use image::ImageBuffer;
+use image::RgbImage;
 use log::{error, info};
 use tokio::time::Instant;
 use warp::Rejection;
+
 use crate::color::Color;
-use image::ImageBuffer;
-use image::RgbImage;
 
 pub type Result<T> = std::result::Result<T, Rejection>;
 
-pub fn save_png(pixels: &Vec<Color>, width: u16, height: u16) {
+pub fn save_png(pixels: &[Color], width: u16, height: u16) {
     let start = Instant::now();
     let mut x = 0;
     let mut y = 0;
@@ -32,13 +33,12 @@ pub fn save_png(pixels: &Vec<Color>, width: u16, height: u16) {
         now.timestamp_millis()
     );
     let res = image.save(filename);
-    let duration =  start.elapsed().as_millis();
+    let duration = start.elapsed().as_millis();
     match res {
         Ok(_) => info!("save ok. took {} ms", duration),
-        Err(e) => error!("error saving file {}. took {} ms", e,duration),
+        Err(e) => error!("error saving file {}. took {} ms", e, duration),
     }
 }
-
 
 pub fn cors() -> warp::cors::Builder {
     warp::cors()
