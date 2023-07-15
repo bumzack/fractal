@@ -7,9 +7,9 @@ use crate::fractal_image::FractalImage;
 pub struct Request {
     pub z1: ComplexNumber,
     pub z2: ComplexNumber,
-    pub width: u16,
-    pub max_iterations: u16,
-    pub colors: u16,
+    pub width: u32,
+    pub max_iterations: u32,
+    pub colors: u32,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug, Default, PartialEq)]

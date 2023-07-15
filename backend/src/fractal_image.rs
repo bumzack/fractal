@@ -3,15 +3,12 @@ use std::fmt::{Debug, Display, Formatter};
 use crate::color::Color;
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Clone, PartialEq)]
-#[derive(Default)]
+#[derive(Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct FractalImage {
-    pub(crate) width: u16,
-    pub(crate) height: u16,
+    pub(crate) width: u32,
+    pub(crate) height: u32,
     pub(crate) pixels: Vec<Color>,
 }
-
-
 
 impl Debug for FractalImage {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

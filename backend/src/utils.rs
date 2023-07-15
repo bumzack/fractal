@@ -9,7 +9,7 @@ use crate::color::Color;
 
 pub type Result<T> = std::result::Result<T, Rejection>;
 
-pub fn save_png(pixels: &[Color], width: u16, height: u16) {
+pub fn save_png(pixels: &[Color], width: u32, height: u32) {
     let start = Instant::now();
     let mut x = 0;
     let mut y = 0;

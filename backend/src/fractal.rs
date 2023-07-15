@@ -1,5 +1,6 @@
+use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 use log::{error, info};
 
@@ -9,12 +10,12 @@ use crate::fractal_image::FractalImage;
 use crate::utils::save_png;
 
 pub fn calc_fractal_color(
-    x: u16,
-    y: u16,
+    x: u32,
+    y: u32,
     upper_left: &ComplexNumber,
     x_delta: f32,
     y_delta: f32,
-    max_iterations: u16,
+    max_iterations: u32,
     colors: &Vec<Color>,
 ) -> Color {
     let mut cnt_iterations = 0;
@@ -46,9 +47,9 @@ pub fn calc_fractal_color(
 pub fn calc_single_threaded(
     z1: &ComplexNumber,
     z2: &ComplexNumber,
-    width: u16,
-    max_iterations: u16,
-    colors: u16,
+    width: u32,
+    max_iterations: u32,
+    colors: u32,
 ) -> (FractalImage, u128) {
     let colors: Vec<Color> = match colors {
         16 => color16(),
@@ -63,7 +64,7 @@ pub fn calc_single_threaded(
 
     // x_diff : y_diff = width : height
     // height = x_diff*width / y_diff
-    let height = (x_diff * width as f32 / y_diff).round() as u16;
+    let height = (x_diff * width as f32 / y_diff).round() as u32;
 
     let x_delta = x_diff / width as f32;
     let y_delta = y_diff / height as f32;
@@ -96,16 +97,11 @@ pub fn calc_single_threaded(
 pub fn calc_multi_threaded(
     z1: &ComplexNumber,
     z2: &ComplexNumber,
-    width: u16,
-    max_iterations: u16,
-    colors: u16,
+    width: u32,
+    max_iterations: u32,
+    colors: u32,
 ) -> (FractalImage, u128, usize) {
     let cores = num_cpus::get() - 2;
-    let colors: Vec<Color> = match colors {
-        16 => color16(),
-        256 => color256(),
-        _ => panic!("number of colors not supported {}", colors),
-    };
 
     let start = Instant::now();
 
@@ -114,29 +110,96 @@ pub fn calc_multi_threaded(
 
     // x_diff : y_diff = width : height
     // height = x_diff*width / y_diff
-    let height = (x_diff * width as f32 / y_diff).round() as u16;
+    let height = (x_diff * width as f32 / y_diff).round() as u32;
 
     let x_delta = x_diff / width as f32;
     let y_delta = y_diff / height as f32;
 
-    info!("x_diff {},  y_diff {},   x_delta {},   y_delta {}   width {}  height {},  max_iterations {}",
-    x_diff, y_diff, x_delta, y_delta, width,  height, max_iterations);
+    info!("x_diff {},  y_diff {},   x_delta {},   y_delta {}   width {}  height {},  max_iterations {}",x_diff, y_diff, x_delta, y_delta, width,  height, max_iterations);
 
-    let mut pixels = vec![];
+    let pixels = vec![Color::default(); width as usize * height as usize];
 
     let mut threads = vec![];
 
+    let y_global = 0;
+
+    let pixels = Arc::new(Mutex::new(pixels));
+    let y_global = Arc::new(Mutex::new(y_global));
+
     for _ in 0..cores {
+        let colors: Vec<Color> = match colors {
+            16 => color16(),
+            256 => color256(),
+            _ => panic!("number of colors not supported {}", colors),
+        };
+
+        let z1 = z1.clone();
+        let mut pixels_thread = vec![];
+
+        let pixels = Arc::clone(&pixels);
+        let y_global = Arc::clone(&y_global);
+
         let thread_join_handle = thread::spawn(move || {
-            info!(
-                "hi from thread {:?} - sleeping for 1 second",
-                thread::current().id()
+            let start = Instant::now();
+            let mut calculated_rows = 0;
+            let mut y_thread = 0;
+
+            while *y_global.lock().unwrap() < height {
+                {
+                    let mut y_global = y_global.lock().unwrap();
+                    if *y_global < height {
+                        y_thread = *y_global;
+                        *y_global += 1;
+                    }
+                }
+                // y_global is unlocked
+
+                if y_thread < height {
+                    info!(
+                        "hi from thread {:?} - calculating row {}",
+                        thread::current().id(),
+                        y_thread
+                    );
+
+                    pixels_thread.clear();
+                    for x in 0..width {
+                        let p = calc_fractal_color(
+                            x,
+                            y_thread,
+                            &z1,
+                            x_delta,
+                            y_delta,
+                            max_iterations,
+                            &colors,
+                        );
+                        pixels_thread.push(p);
+                    }
+
+                    {
+                        let mut p = pixels.lock().unwrap();
+                        for i in 0..width {
+                            let idx = y_thread * width + i;
+                            let p = &mut *p;
+                            let pixel = &mut p[idx as usize];
+                            pixel.r = pixels_thread[i as usize].r;
+                            pixel.g = pixels_thread[i as usize].g;
+                            pixel.b = pixels_thread[i as usize].b;
+                        }
+                    }
+                }
+
+                calculated_rows += 1;
+            }
+
+            let duration = start.elapsed().as_millis();
+            let msg = format!(
+                "hi from thread {:?} - i spent {} ms working on {} rows of the fractal",
+                thread::current().id(),
+                duration,
+                calculated_rows
             );
-            thread::sleep(Duration::from_secs(1));
-            format!(
-                "hi from thread {:?} - awoke from 1 second sleep",
-                thread::current().id()
-            )
+
+            (msg, duration, calculated_rows)
         });
         threads.push(thread_join_handle);
     }
@@ -144,19 +207,17 @@ pub fn calc_multi_threaded(
     for t in threads {
         let res = t.join();
         match res {
-            Ok(s) => info!("thread successfully joined with message '{}'", s),
+            Ok(s) => info!(
+                "thread successfully joined with message '{}',   thread worked for {} ms on {} rows",
+                s.0, s.1,s.2
+            ),
             Err(e) => error!("thread returned an error {:?}", e),
         }
     }
 
-    for y in 0..height {
-        for x in 0..width {
-            let p = calc_fractal_color(x, y, z1, x_delta, y_delta, max_iterations, &colors);
-            pixels.push(p);
-        }
-    }
-
     let duration = start.elapsed().as_millis();
+
+    let pixels = pixels.lock().unwrap().clone();
 
     save_png(&pixels, width, height);
 

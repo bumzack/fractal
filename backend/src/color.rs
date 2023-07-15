@@ -87,8 +87,7 @@ pub struct Hsl {
     pub(crate) l: f32,
 }
 
-#[derive(Deserialize, Serialize, Clone, PartialEq)]
-#[derive(Default)]
+#[derive(Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct Color {
     pub(crate) r: u8,
     pub(crate) g: u8,
@@ -131,8 +130,6 @@ pub fn color16() -> Vec<Color> {
     v.push(WHITE);
     v
 }
-
-
 
 impl Debug for Color {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

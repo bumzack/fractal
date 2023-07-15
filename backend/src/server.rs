@@ -1,12 +1,12 @@
 use log::info;
-use warp::{Filter, Reply};
 use warp::reply::json;
+use warp::{Filter, Reply};
 
-use crate::{models, utils};
 use crate::fractal::{calc_multi_threaded, calc_single_threaded};
 use crate::models::Request;
+use crate::{models, utils};
 
-pub fn routes() -> impl Filter<Extract=(impl warp::Reply, ), Error=warp::Rejection> + Clone {
+pub fn routes() -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
     let server_source = warp::path!("api" / "singlethreaded");
     let single_threaded = server_source
         .and(warp::post())
