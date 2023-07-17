@@ -197,8 +197,7 @@ impl fmt::Display for Tile {
 
 #[cfg(test)]
 mod tests {
-    use crate::image_tile::tiles;
-    use common::image_tile::{tiles, Tile};
+    use crate::image_tile::{tiles, Tile};
 
     #[test]
     fn test_iterator1() {
