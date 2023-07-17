@@ -6,14 +6,14 @@ use crate::color::Color;
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct Pixel {
-    pub(crate) color: Color,
-    pub(crate) x: u32,
-    pub(crate) y: u32,
+    pub color: Color,
+    pub x: u32,
+    pub y: u32,
 }
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct RayonImage {
-    pub(crate) pixels: Vec<Pixel>,
+    pub pixels: Vec<Pixel>,
 }
 
 impl Debug for RayonImage {

@@ -1,11 +1,12 @@
-use serde_derive::{Deserialize, Serialize};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::Add;
 
+use serde_derive::{Deserialize, Serialize};
+
 #[derive(Deserialize, Serialize, Clone, PartialEq)]
 pub struct ComplexNumber {
-    pub(crate) a: f32,
-    pub(crate) b: f32,
+    pub a: f32,
+    pub b: f32,
 }
 
 impl Add for ComplexNumber {
@@ -31,7 +32,7 @@ impl Add<&ComplexNumber> for ComplexNumber {
 }
 
 impl ComplexNumber {
-    pub(crate) fn pow2(&self) -> ComplexNumber {
+    pub fn pow2(&self) -> ComplexNumber {
         // z = a^2 + 2 i a b - b^2
         ComplexNumber {
             a: self.a.powi(2) - self.b.powi(2),
@@ -39,7 +40,7 @@ impl ComplexNumber {
         }
     }
 
-    pub(crate) fn length_squared(&self) -> f32 {
+    pub fn length_squared(&self) -> f32 {
         self.a.powi(2) + self.b.powi(2)
     }
 }

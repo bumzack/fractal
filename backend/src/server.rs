@@ -8,23 +8,24 @@ use warp::reply::json;
 use warp::ws::{Message, WebSocket};
 use warp::{Filter, Reply};
 
-use crate::color::{Color, BLACK, BLUE, NAVY, RED, YELLOW};
+use common::color::{Color, YELLOW};
+use common::fractal_image::FractalImage;
+use common::image_tile::TileData;
+use common::models::{FractalRequest, FractalResponse};
+
 use crate::fractal::{
     calc_multi_threaded, calc_multi_threaded_crossbeam_tiles, calc_rayon, calc_single_threaded,
 };
-use crate::fractal_image::FractalImage;
-use crate::image_tile::TileData;
 use crate::index_html::INDEX_HTML;
-use crate::models::{Request, Response};
+use crate::utils;
 use crate::utils::save_png;
-use crate::{models, utils};
 
 pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection> + Clone {
     let server_source = warp::path!("api" / "singlethreaded");
     let single_threaded = server_source
         .and(warp::post())
         .and(warp::body::json())
-        .and_then(|req: Request| {
+        .and_then(|req: FractalRequest| {
             info!("POST api/singlethreaded");
             handle_request_single_threaded(req)
         });
@@ -33,7 +34,7 @@ pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection>
     let multi_threaded = server_source
         .and(warp::post())
         .and(warp::body::json())
-        .and_then(|req| {
+        .and_then(|req: FractalRequest| {
             info!("POST api/multithreaded");
             handle_request_multi_threaded(req)
         });
@@ -42,7 +43,7 @@ pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection>
     let multi_threaded_rayon = server_source
         .and(warp::post())
         .and(warp::body::json())
-        .and_then(|req| {
+        .and_then(|req: FractalRequest| {
             info!("POST api/rayon");
             handle_request_rayon(req)
         });
@@ -62,11 +63,11 @@ pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection>
         .or(single_threaded)
 }
 
-pub async fn handle_request_single_threaded(req: Request) -> utils::Result<impl Reply> {
+pub async fn handle_request_single_threaded(req: FractalRequest) -> utils::Result<impl Reply> {
     let (fractal, duration) =
         calc_single_threaded(&req.z1, &req.z2, req.width, req.max_iterations, req.colors);
 
-    let response = models::Response {
+    let response = FractalResponse {
         duration: format!("calculation single threaded took {:0.2} ms", duration),
         fractal,
     };
@@ -76,11 +77,11 @@ pub async fn handle_request_single_threaded(req: Request) -> utils::Result<impl 
     Ok(res)
 }
 
-pub async fn handle_request_multi_threaded(req: Request) -> utils::Result<impl Reply> {
+pub async fn handle_request_multi_threaded(req: FractalRequest) -> utils::Result<impl Reply> {
     let (fractal, duration, cores) =
         calc_multi_threaded(&req.z1, &req.z2, req.width, req.max_iterations, req.colors);
 
-    let response = models::Response {
+    let response = FractalResponse {
         duration: format!(
             "calculation  multi_threaded using plain threads  took {:0.2} ms using {}",
             duration, cores
@@ -96,11 +97,11 @@ pub async fn handle_request_multi_threaded(req: Request) -> utils::Result<impl R
     Ok(res)
 }
 
-pub async fn handle_request_rayon(req: Request) -> utils::Result<impl Reply> {
+pub async fn handle_request_rayon(req: FractalRequest) -> utils::Result<impl Reply> {
     let (fractal, duration) =
         calc_rayon(&req.z1, &req.z2, req.width, req.max_iterations, req.colors);
 
-    let response = models::Response {
+    let response = FractalResponse {
         duration: format!("calculation  rayon threaded took {:0.2} ms", duration,),
         fractal,
     };
@@ -149,7 +150,7 @@ async fn handle_request_crossbeam_tiles(ws: WebSocket) {
     };
 
     let duration = "it took 23 ms".to_string();
-    let res = Response { duration, fractal };
+    let res = FractalResponse { duration, fractal };
     let res = json!(res).to_string();
     let msg = Message::text(res);
     websocket_tx
@@ -169,7 +170,7 @@ async fn handle_request_crossbeam_tiles1(ws: WebSocket) {
     match w {
         Ok(msg) => {
             info!("got a message  {:?}", msg.to_str());
-            let request: Request = serde_json::from_str(msg.to_str().unwrap()).unwrap();
+            let request: FractalRequest = serde_json::from_str(msg.to_str().unwrap()).unwrap();
             info!("request {:?}", &request);
 
             let z1 = request.z1;

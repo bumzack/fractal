@@ -6,12 +6,12 @@ use serde_derive::{Deserialize, Serialize};
 
 pub type ColorVec = Vec<Color>;
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct Canvas {
-    width: usize,
-    height: usize,
-    pixel: ColorVec,
-}
+// #[derive(Clone, Debug, PartialEq)]
+// pub struct Canvas {
+//     width: usize,
+//     height: usize,
+//     pixel: ColorVec,
+// }
 
 pub fn tiles(width: u32, height: u32, x_tiles: u32, y_tiles: u32) -> CanvasTile {
     let c = CanvasTile {
@@ -26,6 +26,7 @@ pub fn tiles(width: u32, height: u32, x_tiles: u32, y_tiles: u32) -> CanvasTile 
     info!("canvas tile  {:?}", &c);
     c
 }
+
 #[derive(PartialEq, Eq)]
 pub struct Tile {
     x_from: usize,
@@ -196,7 +197,8 @@ impl fmt::Display for Tile {
 
 #[cfg(test)]
 mod tests {
-    use crate::image_tile::{tiles, Tile};
+    use crate::image_tile::tiles;
+    use common::image_tile::{tiles, Tile};
 
     #[test]
     fn test_iterator1() {

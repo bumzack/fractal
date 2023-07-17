@@ -1,13 +1,14 @@
 use std::fmt::{Debug, Display, Formatter};
 
-use crate::color::Color;
 use serde_derive::{Deserialize, Serialize};
+
+use crate::color::Color;
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct FractalImage {
-    pub(crate) width: u32,
-    pub(crate) height: u32,
-    pub(crate) pixels: Vec<Color>,
+    pub width: u32,
+    pub height: u32,
+    pub pixels: Vec<Color>,
 }
 
 impl Debug for FractalImage {

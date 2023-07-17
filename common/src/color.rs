@@ -89,9 +89,9 @@ pub struct Hsl {
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct Color {
-    pub(crate) r: u8,
-    pub(crate) g: u8,
-    pub(crate) b: u8,
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
 }
 
 pub fn color256() -> Vec<Color> {

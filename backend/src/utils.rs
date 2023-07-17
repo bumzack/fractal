@@ -5,7 +5,7 @@ use log::{error, info};
 use tokio::time::Instant;
 use warp::Rejection;
 
-use crate::color::Color;
+use common::color::Color;
 
 pub type Result<T> = std::result::Result<T, Rejection>;
 
@@ -67,6 +67,7 @@ pub fn cors() -> warp::cors::Builder {
             "Accept-Language",
             "Accept-Post",
             "Access-Control-Allow-Credentials",
+            "Access-Control-Allow-Origin",
             "keep-alive",
             "x-duration",
             "x-provided-by",

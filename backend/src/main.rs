@@ -4,16 +4,10 @@ use warp::Filter;
 
 use crate::server::routes;
 
-mod color;
-mod complex;
 mod fractal;
-mod fractal_image;
-mod models;
-mod rayon_image;
+mod index_html;
 mod server;
 mod utils;
-mod image_tile;
-mod index_html;
 
 // #[tokio::main(worker_threads = 2)]
 #[tokio::main]

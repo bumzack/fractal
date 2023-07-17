@@ -4,7 +4,7 @@ use crate::complex::ComplexNumber;
 use crate::fractal_image::FractalImage;
 
 #[derive(Deserialize, Serialize, Clone, Debug, Default, PartialEq)]
-pub struct Request {
+pub struct FractalRequest {
     pub z1: ComplexNumber,
     pub z2: ComplexNumber,
     pub width: u32,
@@ -15,7 +15,7 @@ pub struct Request {
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug, Default, PartialEq)]
-pub struct Response {
+pub struct FractalResponse {
     pub duration: String,
     pub fractal: FractalImage,
 }

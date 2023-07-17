@@ -22,6 +22,8 @@ num_cpus = "1.15.0"
 rayon = "1.7.0"
 crossbeam = "0.8.2"
 crossbeam-channel = "0.5.8"
+common = { path = "../common" }
+
 
 [dev-dependencies]
 tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }

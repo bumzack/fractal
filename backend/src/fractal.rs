@@ -7,11 +7,12 @@ use log::{error, info};
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelRefMutIterator;
 
-use crate::color::{BLACK, Color, color16, color256};
-use crate::complex::ComplexNumber;
-use crate::fractal_image::FractalImage;
-use crate::image_tile::{TileData, TileDataPoint, tiles};
-use crate::rayon_image::Pixel;
+use common::color::{color16, color256, Color, BLACK};
+use common::complex::ComplexNumber;
+use common::fractal_image::FractalImage;
+use common::image_tile::{tiles, TileData, TileDataPoint};
+use common::rayon_image::Pixel;
+
 use crate::utils::save_png;
 
 pub fn calc_fractal_color(
@@ -471,7 +472,6 @@ pub fn calc_multi_threaded_crossbeam_tiles(
 //
 //     FractalImage::default()
 // }
-
 
 pub fn calc_rayon(
     z1: &ComplexNumber,
