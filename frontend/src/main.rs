@@ -130,18 +130,68 @@ fn draw_to_canvas(fractal_response: &FractalResponse) {
 
 async fn post_single_threaded() -> Result<(), reqwasm::Error> {
     console_log!("post_single_threaded!");
-    let fractal_request = FractalRequest {
-        z1: ComplexNumber { a: -2.0, b: 1.5 },
-        z2: ComplexNumber { a: 1.8, b: -1.5 },
-        width: 400,
-        max_iterations: 20,
-        colors: 256,
-        x_tiles: 10,
-        y_tiles: 10,
-    };
+    let fractal_request = dummy_request();
+
     let fractal_request = serde_json::json!(fractal_request).to_string();
 
     let url = format!("{}{}", SERVER, API_URL_SINGLE_THREADED);
+
+    let re = Request::post(&url)
+        .body(fractal_request)
+        .header("content-type", "application/json")
+        .send()
+        .await?
+        .text()
+        .await;
+
+    let response = re.expect("should be a valid Response/Body !!!");
+    let fractal_response: serde_json::error::Result<FractalResponse> =
+        serde_json::from_str(&response);
+
+    let fractal_response = fractal_response.unwrap();
+    draw_to_canvas(&fractal_response);
+    console_log!("updated data");
+    //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
+
+    console_log!("json: {:?}", fractal_response);
+    Ok(())
+}
+
+async fn post_multi_threaded() -> Result<(), reqwasm::Error> {
+    console_log!("post_multi_threaded!");
+    let fractal_request = dummy_request();
+    let fractal_request = serde_json::json!(fractal_request).to_string();
+
+    let url = format!("{}{}", SERVER, API_URL_MULTI_THREADED);
+
+    let re = Request::post(&url)
+        .body(fractal_request)
+        .header("content-type", "application/json")
+        .send()
+        .await?
+        .text()
+        .await;
+
+    let response = re.expect("should be a valid Response/Body !!!");
+    let fractal_response: serde_json::error::Result<FractalResponse> =
+        serde_json::from_str(&response);
+
+    let fractal_response = fractal_response.unwrap();
+    draw_to_canvas(&fractal_response);
+    console_log!("updated data");
+    //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
+
+    console_log!("json: {:?}", fractal_response);
+    Ok(())
+}
+
+async fn post_rayon() -> Result<(), reqwasm::Error> {
+    console_log!("post_rayon!");
+    let fractal_request = dummy_request();
+
+    let fractal_request = serde_json::json!(fractal_request).to_string();
+
+    let url = format!("{}{}", SERVER, API_URL_RAYON);
 
     let re = Request::post(&url)
         .body(fractal_request)
@@ -222,18 +272,9 @@ async fn post_crossbeam_tiled() {
         //     Ok(_) => console_log!("binary message successfully sent"),
         //     Err(err) => console_log!("error sending message: {:?}", err),
         // }
-        let z1 = ComplexNumber { a: -2.0, b: 1.5 };
-        let z2 = ComplexNumber { a: 1.8, b: -1.5 };
+
         // send off text message
-        let req = FractalRequest {
-            z1,
-            z2,
-            width: 200,
-            max_iterations: 50,
-            colors: 256,
-            x_tiles: 20,
-            y_tiles: 20,
-        };
+        let req = dummy_request();
         let req = serde_json::json!(req).to_string();
         console_log!("sending string to server {}", &req);
         match cloned_ws.send_with_str(&req) {
@@ -243,6 +284,18 @@ async fn post_crossbeam_tiled() {
     });
     socket.set_onopen(Some(onopen_callback.as_ref().unchecked_ref()));
     onopen_callback.forget();
+}
+
+fn dummy_request() -> FractalRequest {
+    FractalRequest {
+        z1: ComplexNumber { a: -2.0, b: 1.5 },
+        z2: ComplexNumber { a: 1., b: -1.5 },
+        width: 800,
+        max_iterations: 20,
+        colors: 256,
+        x_tiles: 10,
+        y_tiles: 10,
+    }
 }
 
 #[component]
@@ -263,6 +316,42 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
                     }
                     Err(e) => {
                         console_log!("error calling server /api/singlethreaded target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    let start_multithreaded = move |e: MouseEvent| {
+        e.prevent_default();
+        console_log!("start_multithreaded  clicked.   event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_multi_threaded().await;
+                match res {
+                    Ok(response) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/multithreaded target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    let start_rayon = move |e: MouseEvent| {
+        e.prevent_default();
+        console_log!("start_rayon  clicked.   event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_rayon().await;
+                match res {
+                    Ok(response) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/rayon target.  {:?}", e)
                     }
                 }
             }
@@ -317,6 +406,16 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
                         button(class="btn btn-primary", type="button", id="singlethreaded" ,on:click=start_singlethreaded){
                                     "Start SingleThreaded"
                         }
+
+                         button(class="btn btn-primary", type="button", id="multithreaded" ,on:click=start_multithreaded){
+                                    "Start Multi Threaded"
+                        }
+
+
+                        button(class="btn btn-primary", type="button", id="multithreaded" ,on:click=start_rayon){
+                                    "Start Rayon"
+                        }
+
 
                         div(class ="canvas-container"  ) {
                             canvas(id="fractal_canvas", class="fractal-canvas" )
