@@ -4,15 +4,6 @@ use std::fmt;
 use crate::color::Color;
 use serde_derive::{Deserialize, Serialize};
 
-pub type ColorVec = Vec<Color>;
-
-// #[derive(Clone, Debug, PartialEq)]
-// pub struct Canvas {
-//     width: usize,
-//     height: usize,
-//     pixel: ColorVec,
-// }
-
 pub fn tiles(width: u32, height: u32, x_tiles: u32, y_tiles: u32) -> CanvasTile {
     let c = CanvasTile {
         x_inc: (width / x_tiles) as usize,

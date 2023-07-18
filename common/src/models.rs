@@ -2,6 +2,7 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::complex::ComplexNumber;
 use crate::fractal_image::FractalImage;
+use crate::image_tile::TileData;
 
 #[derive(Deserialize, Serialize, Clone, Debug, Default, PartialEq)]
 pub struct FractalRequest {
@@ -18,4 +19,21 @@ pub struct FractalRequest {
 pub struct FractalResponse {
     pub duration: String,
     pub fractal: FractalImage,
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug, PartialEq)]
+pub enum WebSocketCommand {
+    GETHEIGHT(FractalRequest),
+    RENDERFRACTAL(FractalRequest),
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug, PartialEq)]
+pub struct WebSocketRequest {
+    pub command: WebSocketCommand,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct WebSocketResponse {
+    pub height: Option<u32>,
+    pub tile: Option<TileData>,
 }

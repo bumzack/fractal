@@ -5,7 +5,6 @@ use warp::Filter;
 use crate::server::routes;
 
 mod fractal;
-mod index_html;
 mod server;
 mod utils;
 

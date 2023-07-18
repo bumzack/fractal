@@ -362,6 +362,13 @@ pub fn calc_multi_threaded(
     (fractal, duration, cores)
 }
 
+pub fn calc_image_height(width: u32, z1: &ComplexNumber, z2: &ComplexNumber) -> u32 {
+    let x_diff = z1.a.abs() + z2.a.abs();
+    let y_diff = z1.b.abs() + z2.b.abs();
+
+    (x_diff * width as f32 / y_diff).round() as u32
+}
+
 pub fn calc_multi_threaded_crossbeam_tiles(
     z1: &ComplexNumber,
     z2: &ComplexNumber,
@@ -381,7 +388,7 @@ pub fn calc_multi_threaded_crossbeam_tiles(
 
     // x_diff : y_diff = width : height
     // height = x_diff*width / y_diff
-    let height = (x_diff * width as f32 / y_diff).round() as u32;
+    let height = calc_image_height(width, z1, z2);
 
     let x_delta = x_diff / width as f32;
     let y_delta = y_diff / height as f32;
@@ -432,7 +439,7 @@ pub fn calc_multi_threaded_crossbeam_tiles(
                                     info!("calc_multi_threaded_crossbeam_tiles:  sending  tile idx {}", idx);
                                 }
                                 Err(e) => {
-                                    info!("calc_multi_threaded_crossbeam_tiles:  error sending a tile    {:?}", e);
+                                    info!("calc_multi_threaded_crossbeam_tiles:  error sending a tile    {:?}", e.to_string());
                                 }
                             };
                         }

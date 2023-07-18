@@ -2,12 +2,14 @@ use reqwasm::http::Request;
 use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
 use wasm_bindgen::prelude::*;
-use web_sys::ImageData;
 use web_sys::MouseEvent;
+use web_sys::{CanvasRenderingContext2d, ImageData};
 use web_sys::{ErrorEvent, MessageEvent, WebSocket};
 
 use common::complex::ComplexNumber;
-use common::models::{FractalRequest, FractalResponse};
+use common::models::{
+    FractalRequest, FractalResponse, WebSocketCommand, WebSocketRequest, WebSocketResponse,
+};
 
 macro_rules! console_log {
     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
@@ -69,24 +71,9 @@ fn draw_to_canvas(fractal_response: &FractalResponse) {
     let width = fractal_response.fractal.width;
     let height = fractal_response.fractal.height;
 
-    let document = web_sys::window().unwrap().document().unwrap();
-    let canvas = document.get_element_by_id("fractal_canvas").unwrap();
-    let canvas: web_sys::HtmlCanvasElement = canvas
-        .dyn_into::<web_sys::HtmlCanvasElement>()
-        .map_err(|_| ())
-        .unwrap();
-
-    let context = canvas
-        .get_context("2d")
-        .unwrap()
-        .unwrap()
-        .dyn_into::<web_sys::CanvasRenderingContext2d>()
-        .unwrap();
+    let context = set_canvas_width_height(width, height);
 
     console_log!("duration {}", fractal_response.duration);
-    let canvas = context.canvas().unwrap();
-    canvas.set_width(width);
-    canvas.set_height(height);
 
     // let data = ImageData::new_with_u8_clamped_array_and_sh(
     //     Clamped(&data),
@@ -126,6 +113,27 @@ fn draw_to_canvas(fractal_response: &FractalResponse) {
     }
 
     console_log!("updated data");
+}
+
+fn set_canvas_width_height(width: u32, height: u32) -> CanvasRenderingContext2d {
+    let document = web_sys::window().unwrap().document().unwrap();
+    let canvas = document.get_element_by_id("fractal_canvas").unwrap();
+    let canvas: web_sys::HtmlCanvasElement = canvas
+        .dyn_into::<web_sys::HtmlCanvasElement>()
+        .map_err(|_| ())
+        .unwrap();
+
+    let context = canvas
+        .get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<web_sys::CanvasRenderingContext2d>()
+        .unwrap();
+
+    let canvas = context.canvas().unwrap();
+    canvas.set_width(width);
+    canvas.set_height(height);
+    context
 }
 
 async fn post_single_threaded() -> Result<(), reqwasm::Error> {
@@ -220,21 +228,47 @@ async fn post_crossbeam_tiled() {
 
     let socket = match ws {
         Ok(websocket) => websocket,
-        Err(e) => panic!("cant open websocket"),
+        Err(e) => panic!("cant open websocket    err {:?}", e),
     };
+
+    let socket_clone = socket.clone();
 
     let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
         e.prevent_default();
+        let req = dummy_request();
+
         if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
             console_log!("message event, received Text: {:?}", txt);
             let t = txt.as_string().unwrap();
-            let fractal_response: serde_json::error::Result<FractalResponse> =
+            let web_socket_response: serde_json::error::Result<WebSocketResponse> =
                 serde_json::from_str(&t);
-            if fractal_response.is_ok() {
-                console_log!("got a valid FractalResponse  {}", &t);
-                let fractal_response = fractal_response.unwrap();
-                draw_to_canvas(&fractal_response);
-                console_log!("updated data");
+
+            if web_socket_response.is_ok() {
+                console_log!("got a valid WebSocketResponse  {}", &t);
+                let web_socket_response = web_socket_response.unwrap();
+                console_log!("web_socket_response   {:?}", &web_socket_response);
+
+                if web_socket_response.height.is_some() {
+                    set_canvas_width_height(req.width, web_socket_response.height.unwrap());
+                }
+                if web_socket_response.tile.is_some() {
+                    let tile = web_socket_response.tile.unwrap();
+                    console_log!("got a tile   {:?}", tile);
+                }
+
+                let req = WebSocketRequest {
+                    command: WebSocketCommand::RENDERFRACTAL(req),
+                };
+
+                let req = serde_json::json!(req).to_string();
+                console_log!("sending string to server {}", &req);
+                match socket_clone.send_with_str(&req) {
+                    Ok(_) => console_log!("sending request to server to start sending tiles: message successfully sent"),
+                    Err(err) => console_log!("error sending message: {:?}", err),
+                }
+
+                // draw_to_canvas(&fractal_response);
+
                 //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
             } else {
                 console_log!(
@@ -275,6 +309,10 @@ async fn post_crossbeam_tiled() {
 
         // send off text message
         let req = dummy_request();
+        let req = WebSocketRequest {
+            command: WebSocketCommand::GETHEIGHT(req),
+        };
+
         let req = serde_json::json!(req).to_string();
         console_log!("sending string to server {}", &req);
         match cloned_ws.send_with_str(&req) {
