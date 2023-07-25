@@ -1,3 +1,4 @@
+use log::info;
 use std::fmt::{Debug, Display, Formatter};
 use std::fs;
 
@@ -95,7 +96,10 @@ pub struct Color {
 }
 
 pub fn color256() -> Vec<Color> {
-    let data = fs::read_to_string("./256-colors.json").expect("Unable to read file");
+    let filename = "256-colors.json";
+    let path = format!("{}/../{}", env!("CARGO_MANIFEST_DIR"), filename);
+    info!("path to json {}", path);
+    let data = fs::read_to_string(path).expect("Unable to read file");
     let colors: Vec<FileColor> = serde_json::from_str(&data).expect("JSON was not well-formatted");
     let cs: Vec<Color> = colors
         .iter()

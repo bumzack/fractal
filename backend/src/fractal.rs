@@ -427,7 +427,7 @@ pub fn calc_multi_threaded_crossbeam_tiles(
                                 for x in tile.x_from()..tile.x_to() {
                                     // info!("thread_id {:?}   raytracing pixel:  {}/{} ", thread::current().id(), x, y);
                                     let c = calc_fractal_color(x as u32, y as u32, z1, x_delta, y_delta, max_iterations, &colors);
-                                    let tile_data_point = TileDataPoint::new(x, y, c);
+                                    let tile_data_point = TileDataPoint::new(x as u32, y as u32, c);
                                     pixels.push(tile_data_point);
                                 }
                             }

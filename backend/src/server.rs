@@ -1,7 +1,5 @@
 use std::time::Instant;
 
-use common::color::Color;
-use common::fractal_image::FractalImage;
 use crossbeam_channel::unbounded;
 use futures_util::{SinkExt, StreamExt, TryFutureExt};
 use log::{error, info};
@@ -10,6 +8,8 @@ use warp::reply::json;
 use warp::ws::{Message, WebSocket};
 use warp::{Filter, Reply};
 
+use common::color::Color;
+use common::fractal_image::FractalImage;
 use common::image_tile::TileData;
 use common::models::{
     FractalRequest, FractalResponse, WebSocketCommand, WebSocketRequest, WebSocketResponse,
@@ -28,7 +28,7 @@ pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection>
         .and(warp::post())
         .and(warp::body::json())
         .and_then(|req: FractalRequest| {
-            info!("POST api/singlethreaded");
+            info!("POST api/singlethreaded  req {:?}", &req);
             handle_request_single_threaded(req)
         });
 
@@ -37,7 +37,7 @@ pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection>
         .and(warp::post())
         .and(warp::body::json())
         .and_then(|req: FractalRequest| {
-            info!("POST api/multithreaded");
+            info!("POST api/multithreaded  req {:?}", &req);
             handle_request_multi_threaded(req)
         });
 
@@ -46,7 +46,7 @@ pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection>
         .and(warp::post())
         .and(warp::body::json())
         .and_then(|req: FractalRequest| {
-            info!("POST api/rayon");
+            info!("POST api/rayon.   req {:?}", &req);
             handle_request_rayon(req)
         });
 
@@ -82,7 +82,7 @@ pub async fn handle_request_multi_threaded(req: FractalRequest) -> utils::Result
 
     let response = FractalResponse {
         duration: format!(
-            "calculation  multi_threaded using plain threads  took {:0.2} ms using {}",
+            "calculation  multi_threaded using plain threads  took {:0.2} ms using {} cores",
             duration, cores
         ),
         fractal,
@@ -210,7 +210,7 @@ async fn handle_request_crossbeam_tiles(ws: WebSocket) {
                             let x_tiles = re.x_tiles;
                             let y_tiles = re.y_tiles;
 
-                            //  tokio thread that calls amethod which produces the tiles
+                            //  tokio thread that calls a method which produces the tiles
                             tokio::task::spawn(async move {
                                 let start = Instant::now();
                                 calc_multi_threaded_crossbeam_tiles(
@@ -236,10 +236,6 @@ async fn handle_request_crossbeam_tiles(ws: WebSocket) {
                                 let z1 = re.z1;
                                 let z2 = re.z2;
                                 let width = re.width;
-                                let max_iterations = re.max_iterations;
-                                let colors = re.colors;
-                                let x_tiles = re.x_tiles;
-                                let y_tiles = re.y_tiles;
 
                                 let x_diff = z1.a.abs() + z2.a.abs();
                                 let y_diff = z1.b.abs() + z2.b.abs();
@@ -259,12 +255,15 @@ async fn handle_request_crossbeam_tiles(ws: WebSocket) {
                                     info!("warp backend got a tile idx {}", tile_data.get_idx());
 
                                     tile_data.get_points().iter().for_each(|p| {
-                                        fractal_image.pixels
-                                            [p.get_y() * width as usize + p.get_x()] =
-                                            p.get_color().clone();
+                                        let idx = (p.get_y() * width + p.get_x()) as usize;
+                                        fractal_image.pixels[idx] = p.get_color().clone();
                                     });
                                     let start = Instant::now();
-                                    let tile_data_json = json!(tile_data).to_string();
+                                    let websocket_response = WebSocketResponse {
+                                        height: None,
+                                        tile: Some(tile_data),
+                                    };
+                                    let tile_data_json = json!(websocket_response).to_string();
                                     let dur = start.elapsed().as_millis();
                                     info!("serialization took: {} ms", dur);
                                     let start = Instant::now();

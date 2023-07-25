@@ -1,8 +1,9 @@
-use log::info;
 use std::fmt;
 
-use crate::color::Color;
+use log::info;
 use serde_derive::{Deserialize, Serialize};
+
+use crate::color::Color;
 
 pub fn tiles(width: u32, height: u32, x_tiles: u32, y_tiles: u32) -> CanvasTile {
     let c = CanvasTile {
@@ -102,27 +103,27 @@ impl Iterator for CanvasTile {
 
 #[derive(Deserialize, Serialize)]
 pub struct TileData {
-    idx: usize,
-    points: Vec<TileDataPoint>,
+    pub idx: usize,
+    pub points: Vec<TileDataPoint>,
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct TileDataPoint {
-    x: usize,
-    y: usize,
+    pub x: u32,
+    pub y: u32,
     c: Color,
 }
 
 impl TileDataPoint {
-    pub fn new(x: usize, y: usize, c: Color) -> TileDataPoint {
+    pub fn new(x: u32, y: u32, c: Color) -> TileDataPoint {
         TileDataPoint { x, y, c }
     }
 
-    pub fn get_x(&self) -> usize {
+    pub fn get_x(&self) -> u32 {
         self.x
     }
 
-    pub fn get_y(&self) -> usize {
+    pub fn get_y(&self) -> u32 {
         self.y
     }
 
