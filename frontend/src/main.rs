@@ -1,10 +1,11 @@
 use reqwasm::http::Request;
 use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
+use sycamore::web::html::canvas;
 use wasm_bindgen::prelude::*;
-use web_sys::MouseEvent;
 use web_sys::{CanvasRenderingContext2d, ImageData};
 use web_sys::{ErrorEvent, MessageEvent, WebSocket};
+use web_sys::{HtmlCanvasElement, MouseEvent};
 
 use common::complex::ComplexNumber;
 use common::models::{
@@ -37,14 +38,10 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
 
     view! { cx,
         div {
-             a(class="list-group-item list-group-item-action", href=format!("#list-item-{}",1)) {
-                             "Single Threaded "
-                    }
+
         }
         div {
-             a(class="list-group-item list-group-item-action", href=format!("#list-item-{}",2)) {
-                             "Multi Threaded via Rayon "
-                    }
+
         }
     }
 }
@@ -67,21 +64,17 @@ const API_URL_SINGLE_THREADED: &str = "/api/singlethreaded";
 const API_URL_MULTI_THREADED: &str = "/api/multithreaded";
 const API_URL_RAYON: &str = "/api/rayon";
 
-fn draw_to_canvas(fractal_response: &FractalResponse) {
+fn draw_to_canvas(
+    fractal_response: &FractalResponse,
+    context: &CanvasRenderingContext2d,
+    canvas: &HtmlCanvasElement,
+) {
     let width = fractal_response.fractal.width;
     let height = fractal_response.fractal.height;
 
-    let context = set_canvas_width_height(width, height);
+    set_canvas_width_height(width, height, canvas);
 
     console_log!("duration {}", fractal_response.duration);
-
-    // let data = ImageData::new_with_u8_clamped_array_and_sh(
-    //     Clamped(&data),
-    //     res.fractal.width,
-    //     res.fractal.height,
-    // )
-    // .expect("this should work");
-    // ctx.put_image_data(&data, 0.0, 0.0);
 
     let image_data = context
         .get_image_data(0.0, 0.0, width.into(), height.into())
@@ -115,11 +108,21 @@ fn draw_to_canvas(fractal_response: &FractalResponse) {
     console_log!("updated data");
 }
 
-fn set_canvas_width_height(width: u32, height: u32) -> CanvasRenderingContext2d {
+fn clear_canvas(canvas: &HtmlCanvasElement) {
+    canvas.set_width(0);
+    canvas.set_height(0);
+}
+
+fn set_canvas_width_height(width: u32, height: u32, canvas: &HtmlCanvasElement) {
+    canvas.set_width(width);
+    canvas.set_height(height);
+}
+
+fn get_canvas_context() -> (CanvasRenderingContext2d, HtmlCanvasElement) {
     let document = web_sys::window().unwrap().document().unwrap();
     let canvas = document.get_element_by_id("fractal_canvas").unwrap();
-    let canvas: web_sys::HtmlCanvasElement = canvas
-        .dyn_into::<web_sys::HtmlCanvasElement>()
+    let canvas: HtmlCanvasElement = canvas
+        .dyn_into::<HtmlCanvasElement>()
         .map_err(|_| ())
         .unwrap();
 
@@ -127,21 +130,21 @@ fn set_canvas_width_height(width: u32, height: u32) -> CanvasRenderingContext2d 
         .get_context("2d")
         .unwrap()
         .unwrap()
-        .dyn_into::<web_sys::CanvasRenderingContext2d>()
+        .dyn_into::<CanvasRenderingContext2d>()
         .unwrap();
 
     let canvas = context.canvas().unwrap();
-    canvas.set_width(width);
-    canvas.set_height(height);
-    context
+    (context, canvas)
 }
 
 async fn post_single_threaded() -> Result<(), reqwasm::Error> {
     console_log!("post_single_threaded!");
+
+    let (context, canvas) = get_canvas_context();
+    clear_canvas(&canvas);
+
     let fractal_request = dummy_request();
-
     let fractal_request = serde_json::json!(fractal_request).to_string();
-
     let url = format!("{}{}", SERVER, API_URL_SINGLE_THREADED);
 
     let re = Request::post(&url)
@@ -157,7 +160,7 @@ async fn post_single_threaded() -> Result<(), reqwasm::Error> {
         serde_json::from_str(&response);
 
     let fractal_response = fractal_response.unwrap();
-    draw_to_canvas(&fractal_response);
+    draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("updated data");
     //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
 
@@ -167,6 +170,9 @@ async fn post_single_threaded() -> Result<(), reqwasm::Error> {
 
 async fn post_multi_threaded() -> Result<(), reqwasm::Error> {
     console_log!("post_multi_threaded!");
+    let (context, canvas) = get_canvas_context();
+    clear_canvas(&canvas);
+
     let fractal_request = dummy_request();
     let fractal_request = serde_json::json!(fractal_request).to_string();
 
@@ -185,7 +191,7 @@ async fn post_multi_threaded() -> Result<(), reqwasm::Error> {
         serde_json::from_str(&response);
 
     let fractal_response = fractal_response.unwrap();
-    draw_to_canvas(&fractal_response);
+    draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("updated data");
     //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
 
@@ -195,10 +201,12 @@ async fn post_multi_threaded() -> Result<(), reqwasm::Error> {
 
 async fn post_rayon() -> Result<(), reqwasm::Error> {
     console_log!("post_rayon!");
+
+    let (context, canvas) = get_canvas_context();
+    clear_canvas(&canvas);
+
     let fractal_request = dummy_request();
-
     let fractal_request = serde_json::json!(fractal_request).to_string();
-
     let url = format!("{}{}", SERVER, API_URL_RAYON);
 
     let re = Request::post(&url)
@@ -214,7 +222,7 @@ async fn post_rayon() -> Result<(), reqwasm::Error> {
         serde_json::from_str(&response);
 
     let fractal_response = fractal_response.unwrap();
-    draw_to_canvas(&fractal_response);
+    draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("updated data");
     //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
 
@@ -224,6 +232,10 @@ async fn post_rayon() -> Result<(), reqwasm::Error> {
 
 async fn post_crossbeam_tiled() {
     console_log!("post_crossbeam_tiled!");
+
+    let (context, canvas) = get_canvas_context();
+    clear_canvas(&canvas);
+
     let ws = WebSocket::new("ws://localhost:3000/api/crossbeamtiles");
 
     let socket = match ws {
@@ -249,7 +261,11 @@ async fn post_crossbeam_tiled() {
                 console_log!("web_socket_response   {:?}", &web_socket_response);
 
                 if web_socket_response.height.is_some() {
-                    set_canvas_width_height(req.width, web_socket_response.height.unwrap());
+                    set_canvas_width_height(
+                        req.width,
+                        web_socket_response.height.unwrap(),
+                        &canvas,
+                    );
                 }
                 if web_socket_response.tile.is_some() {
                     let tile = web_socket_response.tile.unwrap();
@@ -328,7 +344,7 @@ fn dummy_request() -> FractalRequest {
     FractalRequest {
         z1: ComplexNumber { a: -2.0, b: 1.5 },
         z2: ComplexNumber { a: 1., b: -1.5 },
-        width: 800,
+        width: 500,
         max_iterations: 20,
         colors: 256,
         x_tiles: 10,
@@ -426,18 +442,12 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
                         }
                         div(class="btn-toolbar mb-2 mb-md-0"){
                             div(class="btn-group me-2"){
-                                button(class="btn btn-sm btn-outline-secondary", type="button"){
-                                    "Render Image Single Threaded"
-                                }
 
-                                 button(class="btn btn-sm btn-outline-secondary", type="button"){
-                                    "Reset Stats"
-                                }
                             }
                         }
                     }
                     div(   ) {
-                        button(class="btn btn-primary", type="button",id="crossbeam", on:click=start_crossbeam_tiled){
+                        button(class="btn btn-primary", type="button", id="crossbeam", on:click=start_crossbeam_tiled){
                                     "Start WebSocket"
                         }
 
