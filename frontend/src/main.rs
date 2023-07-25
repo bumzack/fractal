@@ -393,8 +393,8 @@ fn dummy_request() -> FractalRequest {
     FractalRequest {
         z1: ComplexNumber { a: -2.0, b: 1.5 },
         z2: ComplexNumber { a: 1., b: -1.5 },
-        width: 500,
-        max_iterations: 20,
+        width: 1200,
+        max_iterations: 2000,
         colors: 256,
         x_tiles: 10,
         y_tiles: 10,
