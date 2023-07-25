@@ -1,14 +1,24 @@
 package at.bumzack.fractalthingi;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
+
 public class FractalRequest {
     ComplexNumber z1;
     ComplexNumber z2;
     int width;
-    int max_iterations;
+
+    @JsonProperty("max_iterations")
+    int maxIterations;
+
     int colors;
-    int x_tiles;
-    int y_tiles;
+
+    @JsonProperty("x_tiles")
+    int xTiles;
+
+    @JsonProperty("y_tiles")
+    int yTiles;
 
     public FractalRequest() {
     }
@@ -37,12 +47,12 @@ public class FractalRequest {
         this.width = width;
     }
 
-    public int getMax_iterations() {
-        return max_iterations;
+    public int getMaxIterations() {
+        return maxIterations;
     }
 
-    public void setMax_iterations(final int max_iterations) {
-        this.max_iterations = max_iterations;
+    public void setMaxIterations(final int maxIterations) {
+        this.maxIterations = maxIterations;
     }
 
     public int getColors() {
@@ -53,19 +63,19 @@ public class FractalRequest {
         this.colors = colors;
     }
 
-    public int getX_tiles() {
-        return x_tiles;
+    public int getxTiles() {
+        return xTiles;
     }
 
-    public void setX_tiles(final int x_tiles) {
-        this.x_tiles = x_tiles;
+    public void setxTiles(final int xTiles) {
+        this.xTiles = xTiles;
     }
 
-    public int getY_tiles() {
-        return y_tiles;
+    public int getyTiles() {
+        return yTiles;
     }
 
-    public void setY_tiles(final int y_tiles) {
-        this.y_tiles = y_tiles;
+    public void setyTiles(final int yTiles) {
+        this.yTiles = yTiles;
     }
 }

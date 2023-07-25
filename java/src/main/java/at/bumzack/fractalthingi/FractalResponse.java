@@ -1,18 +1,21 @@
 package at.bumzack.fractalthingi;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class FractalResponse {
-    String duration_calculation;
+    @JsonProperty("duration_calculation")
+    String durationCalculation;
     FractalImage fractal;
 
     public FractalResponse() {
     }
 
-    public String getDuration_calculation() {
-        return duration_calculation;
+    public String getDurationCalculation() {
+        return durationCalculation;
     }
 
-    public void setDuration_calculation(final String duration_calculation) {
-        this.duration_calculation = duration_calculation;
+    public void setDurationCalculation(final String durationCalculation) {
+        this.durationCalculation = durationCalculation;
     }
 
     public FractalImage getFractal() {

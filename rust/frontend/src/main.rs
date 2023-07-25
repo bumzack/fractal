@@ -64,6 +64,8 @@ const API_URL_SINGLE_THREADED: &str = "/api/singlethreaded";
 const API_URL_MULTI_THREADED: &str = "/api/multithreaded";
 const API_URL_RAYON: &str = "/api/rayon";
 
+const JAVA_SERVER: &str = "http://localhost:4000";
+
 fn draw_to_canvas(
     fractal_response: &FractalResponse,
     context: &CanvasRenderingContext2d,
@@ -273,6 +275,65 @@ async fn post_rayon() -> Result<(), reqwasm::Error> {
     Ok(())
 }
 
+async fn post_single_java() -> Result<(), reqwasm::Error> {
+    console_log!("post_single_java!");
+
+    let (context, canvas) = get_canvas_context();
+    clear_canvas(&canvas);
+
+    let fractal_request = dummy_request();
+    let fractal_request = serde_json::json!(fractal_request).to_string();
+    let url = format!("{}{}", JAVA_SERVER, API_URL_SINGLE_THREADED);
+
+    let re = Request::post(&url)
+        .body(fractal_request)
+        .header("content-type", "application/json")
+        .send()
+        .await?
+        .text()
+        .await;
+
+    let response = re.expect("should be a valid Response/Body !!!");
+    let fractal_response: serde_json::error::Result<FractalResponse> =
+        serde_json::from_str(&response);
+
+    let fractal_response = fractal_response.unwrap();
+    draw_to_canvas(&fractal_response, &context, &canvas);
+    console_log!("image data written to canvas");
+    //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
+
+    // console_log!("json: {:?}", fractal_response);
+    Ok(())
+}
+
+async fn post_multi_java() -> Result<(), reqwasm::Error> {
+    console_log!("post_multi_java!");
+
+    let (context, canvas) = get_canvas_context();
+    clear_canvas(&canvas);
+
+    let fractal_request = dummy_request();
+    let fractal_request = serde_json::json!(fractal_request).to_string();
+    let url = format!("{}{}", JAVA_SERVER, API_URL_MULTI_THREADED);
+
+    let re = Request::post(&url)
+        .body(fractal_request)
+        .header("content-type", "application/json")
+        .send()
+        .await?
+        .text()
+        .await;
+
+    let response = re.expect("should be a valid Response/Body !!!");
+    let fractal_response: serde_json::error::Result<FractalResponse> =
+        serde_json::from_str(&response);
+
+    let fractal_response = fractal_response.unwrap();
+    draw_to_canvas(&fractal_response, &context, &canvas);
+    console_log!("image data written to canvas");
+     Ok(())
+}
+
 async fn post_crossbeam_tiled() {
     console_log!("post_crossbeam_tiled!");
 
@@ -466,12 +527,43 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
         spawn_local_scoped(cx, {
             async move {
                 post_crossbeam_tiled().await;
-                // match res {
-                //     Ok(_) => console_log!("all good"),
-                //     Err(e) => {
-                //         console_log!("error calling server /api/singlethreaded target.  {:?}", e)
-                //     }
-                // }
+                   }
+        });
+    };
+
+
+    let start_java_single = move |e: MouseEvent| {
+        console_log!("start_java_single  clicked.  event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_single_java().await;
+                match res {
+                    Ok(response) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/rayon target.  {:?}", e)
+                    }
+                }
+
+            }
+        });
+    };
+
+    let start_java_multi = move |e: MouseEvent| {
+        console_log!("start_java_multi  clicked.  event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_multi_java().await;
+                match res {
+                    Ok(response) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/rayon target.  {:?}", e)
+                    }
+                }
+
             }
         });
     };
@@ -512,6 +604,17 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
                         button(class="btn btn-primary", type="button", id="multithreaded" ,on:click=start_rayon){
                                     "Start Rayon"
                         }
+
+                         button(class="btn btn-primary", type="button", id="java_singlethreaded" ,on:click=start_java_single){
+                                    "Start Java single threaded"
+                        }
+
+                         button(class="btn btn-primary", type="button", id="java_multithreaded" ,on:click=start_java_multi){
+                                    "Start Java multi threaded"
+                        }
+
+
+
 
 
                         div(class ="canvas-container"  ) {

@@ -1,1 +1,1 @@
-curl -X POST http://localhost:8081/api/singlethreaded        -d '{"z1":{"a":0.0,"b":0.0},"z2":{"a":0.0,"b":0.0},"width":200,"max_iterations":1000,"colors":256,"x_tiles":5,"y_tiles":19}'   --header "Content-Type: application/json"
+curl -X POST http://localhost:8081/api/singlethreaded        -d '{"z1":{"a":-1.0,"b":1.5},"z2":{"a":1.0,"b":-1.5},"width":20,"max_iterations":100,"colors":256,"x_tiles":5,"y_tiles":19}'   --header "Content-Type: application/json"
