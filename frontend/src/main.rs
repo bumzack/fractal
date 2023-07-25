@@ -74,7 +74,7 @@ fn draw_to_canvas(
 
     set_canvas_width_height(width, height, canvas);
 
-    console_log!("duration {}", fractal_response.duration);
+    console_log!("duration {}", fractal_response.duration_calculation);
 
     let image_data = context
         .get_image_data(0.0, 0.0, width.into(), height.into())
