@@ -111,7 +111,7 @@ pub struct TileData {
 pub struct TileDataPoint {
     pub x: u32,
     pub y: u32,
-    c: Color,
+    pub c: Color,
 }
 
 impl TileDataPoint {
