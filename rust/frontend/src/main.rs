@@ -331,7 +331,7 @@ async fn post_multi_java() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("image data written to canvas");
-     Ok(())
+    Ok(())
 }
 
 async fn post_crossbeam_tiled() {
@@ -454,8 +454,8 @@ fn dummy_request() -> FractalRequest {
     FractalRequest {
         z1: ComplexNumber { a: -2.0, b: 1.5 },
         z2: ComplexNumber { a: 1., b: -1.5 },
-        width: 1200,
-        max_iterations: 2000,
+        width: 3200,
+        max_iterations: 10000,
         colors: 256,
         x_tiles: 10,
         y_tiles: 10,
@@ -527,10 +527,9 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
         spawn_local_scoped(cx, {
             async move {
                 post_crossbeam_tiled().await;
-                   }
+            }
         });
     };
-
 
     let start_java_single = move |e: MouseEvent| {
         console_log!("start_java_single  clicked.  event {:?}", e.target());
@@ -545,7 +544,6 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
                         console_log!("error calling server /api/rayon target.  {:?}", e)
                     }
                 }
-
             }
         });
     };
@@ -563,7 +561,6 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
                         console_log!("error calling server /api/rayon target.  {:?}", e)
                     }
                 }
-
             }
         });
     };
