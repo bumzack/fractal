@@ -7,10 +7,10 @@ use log::{error, info};
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelRefMutIterator;
 
-use common::color::{color16, color256, Color, BLACK};
+use common::color::{BLACK, Color, color16, color256};
 use common::complex::ComplexNumber;
 use common::fractal_image::FractalImage;
-use common::image_tile::{tiles, TileData, TileDataPoint};
+use common::image_tile::{TileData, TileDataPoint, tiles};
 use common::rayon_image::Pixel;
 
 use crate::utils::save_png;

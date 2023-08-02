@@ -189,7 +189,7 @@ impl fmt::Display for Tile {
 
 #[cfg(test)]
 mod tests {
-    use crate::image_tile::{tiles, Tile};
+    use crate::image_tile::{Tile, tiles};
 
     #[test]
     fn test_iterator1() {

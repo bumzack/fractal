@@ -35,4 +35,5 @@ features = [
     'HtmlCanvasElement',
     'Window',
     'ImageData',
+    'HtmlParagraphElement'
 ]

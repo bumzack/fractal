@@ -5,6 +5,7 @@ use wasm_bindgen::prelude::*;
 use web_sys::{CanvasRenderingContext2d, ImageData};
 use web_sys::{ErrorEvent, MessageEvent, WebSocket};
 use web_sys::{HtmlCanvasElement, MouseEvent};
+use web_sys::HtmlParagraphElement;
 
 use common::complex::ComplexNumber;
 use common::image_tile::TileData;
@@ -27,21 +28,190 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
     // wtf   ¯\_(ツ)_/¯
 
     let _app_state = use_context::<Signal<AppState>>(cx);
-    // let mut server = app_state.get().server.clone();
 
-    // let s = server
-    //     .drain(..)
-    //     .map(|s| s.get().as_ref().clone())
-    //     .collect::<Vec<ServerSource>>();
 
-    // let iter = create_signal(cx, s);
+    let start_singlethreaded = move |e: MouseEvent| {
+        e.prevent_default();
+        console_log!("start_singlethreaded  clicked.   event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_single_threaded().await;
+                match res {
+                    Ok(response) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/singlethreaded target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    let start_multithreaded = move |e: MouseEvent| {
+        e.prevent_default();
+        console_log!("start_multithreaded  clicked.   event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_multi_threaded().await;
+                match res {
+                    Ok(response) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/multithreaded target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    let start_rayon = move |e: MouseEvent| {
+        e.prevent_default();
+        console_log!("start_rayon  clicked.   event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_rayon().await;
+                match res {
+                    Ok(response) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/rayon target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    let start_crossbeam_tiled = move |e: MouseEvent| {
+        console_log!("start_crossbeam_tiled  clicked.  event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                post_crossbeam_tiled().await;
+            }
+        });
+    };
+
+    let start_java_single = move |e: MouseEvent| {
+        console_log!("start_java_single  clicked.  event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_single_java().await;
+                match res {
+                    Ok(response) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/rayon target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    let start_java_multi = move |e: MouseEvent| {
+        console_log!("start_java_multi  clicked.  event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_multi_java().await;
+                match res {
+                    Ok(response) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/rayon target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
 
     view! { cx,
-        div {
 
+        div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="singlethreaded" ,on:click=start_singlethreaded) {
+                            "Single threaded"
+                }
+
+                br {
+
+                }
+                p(id = "rust-single-threaded") {
+                    "Duration:"
+                }
+            }
         }
-        div {
 
+         div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="multithreaded" ,on:click=start_multithreaded) {
+                        "Multi threaded"
+                }
+                br {
+
+                }
+                p(id = "rust-multi-threaded") {
+                    "Duration:"
+                }
+            }
+        }
+
+         div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                 button(class="btn btn-primary", type="button", id="crossbeam", on:click=start_crossbeam_tiled) {
+                        "Crossbeam tiled"
+                 }
+                br {
+
+                }
+                p(id = "crossbeam-tiled") {
+                    "Duration:"
+                }
+            }
+        }
+
+          div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="rayon" ,on:click=start_rayon){
+                    "Rayon"
+                }
+                br {
+
+                }
+                p(id = "rust-rayon") {
+                    "Duration:"
+                }
+            }
+        }
+
+          div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="java_singlethreaded" ,on:click=start_java_single){
+                            "Java single threaded"
+                }
+                br {
+
+                }
+                p(id = "java-single-threaded") {
+                    "Duration:"
+                }
+            }
+        }
+
+          div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                 button(class="btn btn-primary", type="button", id="java_multithreaded" ,on:click=start_java_multi){
+                            "Java multi threaded"
+                }
+                br {
+
+                }
+                p(id = "java-multi-threaded") {
+                    "Duration:"
+                }
+            }
         }
     }
 }
@@ -50,7 +220,7 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
 async fn Header<G: Html>(cx: Scope<'_>) -> View<G> {
     view! { cx,
         header(class = "py-3 mb-3 border-bottom") {
-            div(class = "container-fluid d-grid gap-3 align-items-center", style ="rid-template-columns: 1fr 2fr;") {
+            div(class = "container-fluid d-grid gap-3 align-items-center", style ="grid-template-columns: 1fr 2fr;") {
                 span(class="navbar-brand mb-0 h1") {
                     "FractalThingi"
                 }
@@ -103,7 +273,7 @@ fn draw_to_canvas(
             .unwrap();
     let res = context.put_image_data(&data, 0.0, 0.0);
     match res {
-        Ok(r) => console_log!("writing data successfull "),
+        Ok(r) => console_log!("writing data successful"),
         Err(e) => console_log!("error writing image data {:?}", e),
     }
 
@@ -207,9 +377,7 @@ async fn post_single_threaded() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("updated data");
-    //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
-
-    console_log!("json: {:?}", fractal_response);
+    set_info_text(fractal_response, "rust-single-threaded");
     Ok(())
 }
 
@@ -239,9 +407,22 @@ async fn post_multi_threaded() -> Result<(), reqwasm::Error> {
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("updated data");
     //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
+    set_info_text(fractal_response, "rust-multi-threaded");
 
-    console_log!("json: {:?}", fractal_response);
     Ok(())
+}
+
+fn set_info_text(fractal_response: FractalResponse, id: &str) {
+    let document = web_sys::window().unwrap().document().unwrap();
+    let p = document.get_element_by_id(id).unwrap();
+    let p: HtmlParagraphElement = p
+        .dyn_into::<HtmlParagraphElement>()
+        .map_err(|_| ())
+        .unwrap();
+
+    let pixels_per_msec = (fractal_response.fractal.height * fractal_response.fractal.width) as f64 / fractal_response.duration_ms as f64;
+    let txt = format!("Dur: {} ms, {:.4} Pixels / ms", fractal_response.duration_ms, pixels_per_msec);
+    p.set_inner_text(&txt);
 }
 
 async fn post_rayon() -> Result<(), reqwasm::Error> {
@@ -271,7 +452,7 @@ async fn post_rayon() -> Result<(), reqwasm::Error> {
     console_log!("updated data");
     //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
 
-    console_log!("json: {:?}", fractal_response);
+    set_info_text(fractal_response, "rust-rayon");
     Ok(())
 }
 
@@ -300,9 +481,8 @@ async fn post_single_java() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("image data written to canvas");
-    //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
 
-    // console_log!("json: {:?}", fractal_response);
+    set_info_text(fractal_response, "java-single-threaded");
     Ok(())
 }
 
@@ -331,6 +511,7 @@ async fn post_multi_java() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("image data written to canvas");
+    set_info_text(fractal_response, "java-multi-threaded");
     Ok(())
 }
 
@@ -423,16 +604,6 @@ async fn post_crossbeam_tiled() {
     let cloned_ws = socket.clone();
     let onopen_callback = Closure::<dyn FnMut()>::new(move || {
         console_log!("socket opened");
-        // match cloned_ws.send_with_str("ping") {
-        //     Ok(_) => console_log!("message successfully sent"),
-        //     Err(err) => console_log!("error sending message: {:?}", err),
-        // }
-        // // send off binary message
-        // match cloned_ws.send_with_u8_array(&[0, 1, 2, 3]) {
-        //     Ok(_) => console_log!("binary message successfully sent"),
-        //     Err(err) => console_log!("error sending message: {:?}", err),
-        // }
-
         // send off text message
         let req = dummy_request();
         let req = WebSocketRequest {
@@ -454,11 +625,11 @@ fn dummy_request() -> FractalRequest {
     FractalRequest {
         z1: ComplexNumber { a: -2.0, b: 1.5 },
         z2: ComplexNumber { a: 1., b: -1.5 },
-        width: 3200,
+        width: 1200,
         max_iterations: 10000,
         colors: 256,
-        x_tiles: 10,
-        y_tiles: 10,
+        x_tiles: 30,
+        y_tiles: 30,
     }
 }
 
@@ -468,102 +639,6 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
 
     // , on:click=handle_save_stats
 
-    let start_singlethreaded = move |e: MouseEvent| {
-        e.prevent_default();
-        console_log!("start_singlethreaded  clicked.   event {:?}", e.target());
-        spawn_local_scoped(cx, {
-            async move {
-                let res = post_single_threaded().await;
-                match res {
-                    Ok(response) => {
-                        console_log!("all good");
-                    }
-                    Err(e) => {
-                        console_log!("error calling server /api/singlethreaded target.  {:?}", e)
-                    }
-                }
-            }
-        });
-    };
-
-    let start_multithreaded = move |e: MouseEvent| {
-        e.prevent_default();
-        console_log!("start_multithreaded  clicked.   event {:?}", e.target());
-        spawn_local_scoped(cx, {
-            async move {
-                let res = post_multi_threaded().await;
-                match res {
-                    Ok(response) => {
-                        console_log!("all good");
-                    }
-                    Err(e) => {
-                        console_log!("error calling server /api/multithreaded target.  {:?}", e)
-                    }
-                }
-            }
-        });
-    };
-
-    let start_rayon = move |e: MouseEvent| {
-        e.prevent_default();
-        console_log!("start_rayon  clicked.   event {:?}", e.target());
-        spawn_local_scoped(cx, {
-            async move {
-                let res = post_rayon().await;
-                match res {
-                    Ok(response) => {
-                        console_log!("all good");
-                    }
-                    Err(e) => {
-                        console_log!("error calling server /api/rayon target.  {:?}", e)
-                    }
-                }
-            }
-        });
-    };
-
-    let start_crossbeam_tiled = move |e: MouseEvent| {
-        console_log!("start_crossbeam_tiled  clicked.  event {:?}", e.target());
-        spawn_local_scoped(cx, {
-            async move {
-                post_crossbeam_tiled().await;
-            }
-        });
-    };
-
-    let start_java_single = move |e: MouseEvent| {
-        console_log!("start_java_single  clicked.  event {:?}", e.target());
-        spawn_local_scoped(cx, {
-            async move {
-                let res = post_single_java().await;
-                match res {
-                    Ok(response) => {
-                        console_log!("all good");
-                    }
-                    Err(e) => {
-                        console_log!("error calling server /api/rayon target.  {:?}", e)
-                    }
-                }
-            }
-        });
-    };
-
-    let start_java_multi = move |e: MouseEvent| {
-        console_log!("start_java_multi  clicked.  event {:?}", e.target());
-        spawn_local_scoped(cx, {
-            async move {
-                let res = post_multi_java().await;
-                match res {
-                    Ok(response) => {
-                        console_log!("all good");
-                    }
-                    Err(e) => {
-                        console_log!("error calling server /api/rayon target.  {:?}", e)
-                    }
-                }
-            }
-        });
-    };
 
     view! { cx,
         div(class = "container-fluid") {
@@ -576,44 +651,14 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
                 div(class="col"){
                     div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom") {
                         h1(class="h1"){
-                            "Source Servers bla"
+                            "Funny image"
                         }
                         div(class="btn-toolbar mb-2 mb-md-0"){
                             div(class="btn-group me-2"){
-
                             }
                         }
                     }
-                    div(   ) {
-                        button(class="btn btn-primary", type="button", id="crossbeam", on:click=start_crossbeam_tiled){
-                                    "Start WebSocket"
-                        }
-
-                        button(class="btn btn-primary", type="button", id="singlethreaded" ,on:click=start_singlethreaded){
-                                    "Start SingleThreaded"
-                        }
-
-                         button(class="btn btn-primary", type="button", id="multithreaded" ,on:click=start_multithreaded){
-                                    "Start Multi Threaded"
-                        }
-
-
-                        button(class="btn btn-primary", type="button", id="multithreaded" ,on:click=start_rayon){
-                                    "Start Rayon"
-                        }
-
-                         button(class="btn btn-primary", type="button", id="java_singlethreaded" ,on:click=start_java_single){
-                                    "Start Java single threaded"
-                        }
-
-                         button(class="btn btn-primary", type="button", id="java_multithreaded" ,on:click=start_java_multi){
-                                    "Start Java multi threaded"
-                        }
-
-
-
-
-
+                    div {
                         div(class ="canvas-container"  ) {
                             canvas(id="fractal_canvas", class="fractal-canvas" )
                         }

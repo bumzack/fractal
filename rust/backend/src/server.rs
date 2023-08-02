@@ -4,9 +4,9 @@ use crossbeam_channel::unbounded;
 use futures_util::{SinkExt, StreamExt, TryFutureExt};
 use log::{error, info};
 use serde_json::json;
+use warp::{Filter, Reply};
 use warp::reply::json;
 use warp::ws::{Message, WebSocket};
-use warp::{Filter, Reply};
 
 use common::color::Color;
 use common::fractal_image::FractalImage;
@@ -22,7 +22,7 @@ use crate::fractal::{
 use crate::utils;
 use crate::utils::save_png;
 
-pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection> + Clone {
+pub fn routes() -> impl Filter<Extract=(impl Reply, ), Error=warp::Rejection> + Clone {
     let server_source = warp::path!("api" / "singlethreaded");
     let single_threaded = server_source
         .and(warp::post())
@@ -68,6 +68,7 @@ pub async fn handle_request_single_threaded(req: FractalRequest) -> utils::Resul
 
     let response = FractalResponse {
         duration_calculation: format!("calculation single threaded took {:0.2} ms", duration),
+        duration_ms: duration,
         fractal,
     };
     let res = json(&response);
@@ -86,6 +87,7 @@ pub async fn handle_request_multi_threaded(req: FractalRequest) -> utils::Result
             duration, cores
         ),
         fractal,
+        duration_ms: duration,
     };
     let res = json(&response);
 
@@ -101,8 +103,9 @@ pub async fn handle_request_rayon(req: FractalRequest) -> utils::Result<impl Rep
         calc_rayon(&req.z1, &req.z2, req.width, req.max_iterations, req.colors);
 
     let response = FractalResponse {
-        duration_calculation: format!("calculation  rayon threaded took {:0.2} ms", duration,),
+        duration_calculation: format!("calculation  rayon threaded took {:0.2} ms", duration),
         fractal,
+        duration_ms: duration,
     };
     let res = json(&response);
 
