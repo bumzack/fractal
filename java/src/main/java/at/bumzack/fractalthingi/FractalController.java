@@ -33,6 +33,7 @@ public class FractalController {
         final var res = new FractalResponse();
         res.fractal = img.getFirst();
         res.durationCalculation = String.format("java singlethreaded took %s ms", img.getSecond());
+        res.durationMs = img.getSecond();
         return res;
     }
 
@@ -50,6 +51,7 @@ public class FractalController {
         final var res = new FractalResponse();
         res.fractal = img.getFirst();
         res.durationCalculation = String.format("java multiThreaded took %s ms", img.getSecond());
+        res.durationMs = img.getSecond();
         return res;
     }
 }
