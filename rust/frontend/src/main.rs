@@ -452,10 +452,24 @@ async fn post_crossbeam_tiled() {
 
 fn dummy_request() -> FractalRequest {
     FractalRequest {
-        z1: ComplexNumber { a: -2.0, b: 1.5 },
-        z2: ComplexNumber { a: 1., b: -1.5 },
-        width: 3200,
-        max_iterations: 10000,
+        //z1: ComplexNumber { a: -2.0, b: 1.5 },
+        //z2: ComplexNumber { a: 1., b: -1.5 },
+        z1: ComplexNumber {
+            a: -0.9444,
+            b: -0.2747,
+        },
+        z2: ComplexNumber {
+            a: -0.8216,
+            b: -0.1826,
+        },
+
+        //     z1: ComplexNumber { a: -1.4241, b: 0.1581 },
+        //      z2: ComplexNumber { a: -1.4242, b: 0.15822 },
+
+        // z1: ComplexNumber { a: -1.424240107, b:  0.1582373163},
+        // z2: ComplexNumber { a:  -1.4242439848, b: 0.158237603 },
+        width: 600,
+        max_iterations: 1000,
         colors: 256,
         x_tiles: 10,
         y_tiles: 10,
@@ -575,9 +589,9 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
                 }
                 div(class="col"){
                     div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom") {
-                        h1(class="h1"){
-                            "Source Servers bla"
-                        }
+                        // h1(class="h1"){
+                        //     "Source Servers bla"
+                        // }
                         div(class="btn-toolbar mb-2 mb-md-0"){
                             div(class="btn-group me-2"){
 

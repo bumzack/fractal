@@ -7,10 +7,10 @@ use log::{error, info};
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelRefMutIterator;
 
-use common::color::{color16, color256, Color, BLACK};
+use common::color::{BLACK, Color, color16, color256};
 use common::complex::ComplexNumber;
 use common::fractal_image::FractalImage;
-use common::image_tile::{tiles, TileData, TileDataPoint};
+use common::image_tile::{TileData, TileDataPoint, tiles};
 use common::rayon_image::Pixel;
 
 use crate::utils::save_png;
@@ -19,18 +19,52 @@ pub fn calc_fractal_color(
     x: u32,
     y: u32,
     upper_left: &ComplexNumber,
-    x_delta: f32,
-    y_delta: f32,
+    x_delta: f64,
+    y_delta: f64,
     max_iterations: u32,
     colors: &Vec<Color>,
 ) -> Color {
     let mut cnt_iterations = 0;
     let c = ComplexNumber {
-        a: upper_left.a + x as f32 * x_delta,
-        b: upper_left.b - (y) as f32 * y_delta,
+        a: upper_left.a + x as f64 * x_delta,
+        b: upper_left.b - (y) as f64 * y_delta,
     };
 
     // info!("c = {}", &c);
+
+    let mut z = ComplexNumber::default();
+    while z.length_squared() < 4.0 && cnt_iterations < max_iterations {
+        z = z.pow2() + &c;
+        cnt_iterations += 1;
+    }
+    //info!("z = {}, c = {} ,  cnt_iterations {}, max_iterations {}", &z, &c, cnt_iterations, max_iterations);
+
+    if cnt_iterations >= max_iterations {
+        //  info!("BLACK       z = {}, c = {} ,  cnt_iterations {}, max_iterations {}", &z, &c, cnt_iterations, max_iterations);
+        BLACK
+    } else {
+        let idx = cnt_iterations as usize % colors.len();
+        let c: &Color = colors.get(idx).unwrap();
+        //  info!("color    idx {}   z = {}, c = {} ,  cnt_iterations {}, max_iterations {}",idx, &z, &c, cnt_iterations, max_iterations);
+        c.clone()
+    }
+}
+
+pub fn calc_fractal_color2(
+    x: u32,
+    y: u32,
+    re_min: f64,
+    img_min: f64,
+    x_delta: f64,
+    y_delta: f64,
+    max_iterations: u32,
+    colors: &Vec<Color>,
+) -> Color {
+    let mut cnt_iterations = 0;
+    let c = ComplexNumber {
+        a: re_min + x as f64 * x_delta,
+        b: img_min + (y) as f64 * y_delta,
+    };
 
     let mut z = ComplexNumber::default();
     while z.length_squared() < 4.0 && cnt_iterations < max_iterations {
@@ -70,10 +104,10 @@ pub fn calc_single_threaded(
 
     // x_diff : y_diff = width : height
     // height = x_diff*width / y_diff
-    let height = (x_diff * width as f32 / y_diff).round() as u32;
+    let height = (x_diff * width as f64 / y_diff).round() as u32;
 
-    let x_delta = x_diff / width as f32;
-    let y_delta = y_diff / height as f32;
+    let x_delta = x_diff / width as f64;
+    let y_delta = y_diff / height as f64;
 
     info!("x_diff {},  y_diff {},   x_delta {},   y_delta {}   width {}  height {},  max_iterations {}",
     x_diff, y_diff, x_delta, y_delta, width,  height, max_iterations);
@@ -117,12 +151,18 @@ pub fn calc_multi_threaded_slow(
 
     // x_diff : y_diff = width : height
     // height = x_diff*width / y_diff
-    let height = (x_diff * width as f32 / y_diff).round() as u32;
+    let height = (x_diff * width as f64 / y_diff).round() as u32;
 
-    let x_delta = x_diff / width as f32;
-    let y_delta = y_diff / height as f32;
+    let re_min = if z1.a < z2.a { z1.a } else { z2.a };
+    let re_max = if z1.a > z2.a { z1.a } else { z2.a };
 
-    info!("x_diff {},  y_diff {},   x_delta {},   y_delta {}   width {}  height {},  max_iterations {}",x_diff, y_diff, x_delta, y_delta, width,  height, max_iterations);
+    let img_min = if z1.b < z2.b { z1.b } else { z2.b };
+    let img_max = if z1.b > z2.b { z1.b } else { z2.b };
+
+    let x_delta = (re_max - re_min) / width as f64;
+    let y_delta = (img_max - img_min) / height as f64;
+
+    info!("x_diff {},  y_diff {},   x_delta {},   y_delta {}   width {}  height {},  max_iterations {}", x_diff, y_diff, x_delta, y_delta, width,  height, max_iterations);
 
     let pixels = vec![Color::default(); width as usize * height as usize];
 
@@ -247,12 +287,22 @@ pub fn calc_multi_threaded(
 
     // x_diff : y_diff = width : height
     // height = x_diff*width / y_diff
-    let height = (x_diff * width as f32 / y_diff).round() as u32;
+    // let width = 800;
+    // let height = 600;
 
-    let x_delta = x_diff / width as f32;
-    let y_delta = y_diff / height as f32;
+    let re_min = if z1.a < z2.a { z1.a } else { z2.a };
+    let re_max = if z1.a > z2.a { z1.a } else { z2.a };
 
-    info!("x_diff {},  y_diff {},   x_delta {},   y_delta {}   width {}  height {},  max_iterations {}",x_diff, y_diff, x_delta, y_delta, width,  height, max_iterations);
+    let img_min = if z1.b < z2.b { z1.b } else { z2.b };
+    let img_max = if z1.b > z2.b { z1.b } else { z2.b };
+
+    let height = ((re_max - re_min) /  (img_max - img_min) * width as f64).round() as u32;
+
+    let x_delta = (re_max - re_min) / width as f64;
+    let y_delta = (img_max - img_min) / height as f64;
+
+    info!("x_delta {},   y_delta {}   width {}  height {},  max_iterations {},  re_min {}, re_max {}, img_min {}, img_max {}" ,
+        x_delta, y_delta, width,  height, max_iterations, re_min, re_max, img_min, img_max);
 
     let pixels = vec![Color::default(); width as usize * height as usize];
 
@@ -270,7 +320,7 @@ pub fn calc_multi_threaded(
             _ => panic!("number of colors not supported {}", colors),
         };
 
-        let z1 = z1.clone();
+        // let z1 = z1.clone();
         let mut pixels_thread = vec![Color::default(); width as usize];
 
         let pixels = Arc::clone(&pixels);
@@ -293,10 +343,11 @@ pub fn calc_multi_threaded(
 
                 if y_thread < height {
                     for x in 0..width {
-                        let p = calc_fractal_color(
+                        let p = calc_fractal_color2(
                             x,
                             y_thread,
-                            &z1,
+                            re_min,
+                            img_min,
                             x_delta,
                             y_delta,
                             max_iterations,
@@ -366,7 +417,7 @@ pub fn calc_image_height(width: u32, z1: &ComplexNumber, z2: &ComplexNumber) -> 
     let x_diff = z1.a.abs() + z2.a.abs();
     let y_diff = z1.b.abs() + z2.b.abs();
 
-    (x_diff * width as f32 / y_diff).round() as u32
+    (x_diff * width as f64 / y_diff).round() as u32
 }
 
 pub fn calc_multi_threaded_crossbeam_tiles(
@@ -390,8 +441,8 @@ pub fn calc_multi_threaded_crossbeam_tiles(
     // height = x_diff*width / y_diff
     let height = calc_image_height(width, z1, z2);
 
-    let x_delta = x_diff / width as f32;
-    let y_delta = y_diff / height as f32;
+    let x_delta = x_diff / width as f64;
+    let y_delta = y_diff / height as f64;
 
     info!("x_diff {},  y_diff {},   x_delta {},   y_delta {}   width {}  height {},  max_iterations {}",x_diff, y_diff, x_delta, y_delta, width,  height, max_iterations);
 
@@ -500,10 +551,10 @@ pub fn calc_rayon(
 
     // x_diff : y_diff = width : height
     // height = x_diff*width / y_diff
-    let height = (x_diff * width as f32 / y_diff).round() as u32;
+    let height = (x_diff * width as f64 / y_diff).round() as u32;
 
-    let x_delta = x_diff / width as f32;
-    let y_delta = y_diff / height as f32;
+    let x_delta = x_diff / width as f64;
+    let y_delta = y_diff / height as f64;
 
     info!("x_diff {},  y_diff {},   x_delta {},   y_delta {}   width {}  height {},  max_iterations {}",x_diff, y_diff, x_delta, y_delta, width,  height, max_iterations);
 

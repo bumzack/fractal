@@ -4,9 +4,9 @@ use crossbeam_channel::unbounded;
 use futures_util::{SinkExt, StreamExt, TryFutureExt};
 use log::{error, info};
 use serde_json::json;
+use warp::{Filter, Reply};
 use warp::reply::json;
 use warp::ws::{Message, WebSocket};
-use warp::{Filter, Reply};
 
 use common::color::Color;
 use common::fractal_image::FractalImage;
@@ -22,7 +22,7 @@ use crate::fractal::{
 use crate::utils;
 use crate::utils::save_png;
 
-pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection> + Clone {
+pub fn routes() -> impl Filter<Extract=(impl Reply, ), Error=warp::Rejection> + Clone {
     let server_source = warp::path!("api" / "singlethreaded");
     let single_threaded = server_source
         .and(warp::post())
@@ -101,7 +101,7 @@ pub async fn handle_request_rayon(req: FractalRequest) -> utils::Result<impl Rep
         calc_rayon(&req.z1, &req.z2, req.width, req.max_iterations, req.colors);
 
     let response = FractalResponse {
-        duration_calculation: format!("calculation  rayon threaded took {:0.2} ms", duration,),
+        duration_calculation: format!("calculation  rayon threaded took {:0.2} ms", duration, ),
         fractal,
     };
     let res = json(&response);
@@ -242,7 +242,7 @@ async fn handle_request_crossbeam_tiles(ws: WebSocket) {
 
                                 // x_diff : y_diff = width : height
                                 // height = x_diff*width / y_diff
-                                let height = (x_diff * width as f32 / y_diff).round() as u32;
+                                let height = (x_diff * width as f64 / y_diff).round() as u32;
 
                                 // let mut cnt = 1;
                                 let mut fractal_image = FractalImage {

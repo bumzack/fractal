@@ -1,7 +1,7 @@
-use log::info;
 use std::fmt::{Debug, Display, Formatter};
 use std::fs;
 
+use log::info;
 use serde_derive::{Deserialize, Serialize};
 
 pub const BLACK: Color = Color { r: 0, g: 0, b: 0 };
