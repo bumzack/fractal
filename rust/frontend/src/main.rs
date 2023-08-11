@@ -454,17 +454,22 @@ fn dummy_request() -> FractalRequest {
     FractalRequest {
         //z1: ComplexNumber { a: -2.0, b: 1.5 },
         //z2: ComplexNumber { a: 1., b: -1.5 },
+        // z1: ComplexNumber {
+        //     a: -0.9444,
+        //     b: -0.2747,
+        // },
+        // z2: ComplexNumber {
+        //     a: -0.8216,
+        //     b: -0.1826,
+        // },
         z1: ComplexNumber {
-            a: -0.9444,
-            b: -0.2747,
+            a: -1.4241,
+            b: 0.1581,
         },
         z2: ComplexNumber {
-            a: -0.8216,
-            b: -0.1826,
+            a: -1.4242,
+            b: 0.15822,
         },
-
-        //     z1: ComplexNumber { a: -1.4241, b: 0.1581 },
-        //      z2: ComplexNumber { a: -1.4242, b: 0.15822 },
 
         // z1: ComplexNumber { a: -1.424240107, b:  0.1582373163},
         // z2: ComplexNumber { a:  -1.4242439848, b: 0.158237603 },

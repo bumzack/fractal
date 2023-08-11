@@ -1,44 +1,6 @@
-use chrono::Utc;
-use image::ImageBuffer;
-use image::RgbImage;
-use log::{error, info};
-use tokio::time::Instant;
 use warp::Rejection;
 
-use common::color::Color;
-
 pub type Result<T> = std::result::Result<T, Rejection>;
-
-pub fn save_png(pixels: &[Color], width: u32, height: u32) {
-    let start = Instant::now();
-    let mut x = 0;
-    let mut y = 0;
-    let mut image: RgbImage = ImageBuffer::new(width, height);
-
-    for p in pixels.iter() {
-        let pixel = image::Rgb([p.r, p.g, p.b]);
-        // info!("pixels_vec = {:?}, pixel = {:?}", p, pixel);
-        image.put_pixel(x, y as u32, pixel);
-        x += 1;
-        if x % width == 0 {
-            y += 1;
-            x = 0;
-        }
-    }
-    let now = Utc::now();
-    let filename = format!(
-        "fractal_{}_{}_{}.png",
-        width,
-        height,
-        now.timestamp_millis()
-    );
-    let res = image.save(filename);
-    let duration = start.elapsed().as_millis();
-    match res {
-        Ok(_) => info!("save ok. took {} ms", duration),
-        Err(e) => error!("error saving file {}. took {} ms", e, duration),
-    }
-}
 
 pub fn cors() -> warp::cors::Builder {
     warp::cors()

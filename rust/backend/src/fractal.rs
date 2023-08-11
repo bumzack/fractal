@@ -7,13 +7,12 @@ use log::{error, info};
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelRefMutIterator;
 
-use common::color::{BLACK, Color, color16, color256};
+use common::color::{color16, color256, Color, BLACK};
 use common::complex::ComplexNumber;
 use common::fractal_image::FractalImage;
-use common::image_tile::{TileData, TileDataPoint, tiles};
+use common::image_tile::{tiles, TileData, TileDataPoint};
 use common::rayon_image::Pixel;
-
-use crate::utils::save_png;
+use common::utils::save_png;
 
 pub fn calc_fractal_color(
     x: u32,
@@ -296,7 +295,7 @@ pub fn calc_multi_threaded(
     let img_min = if z1.b < z2.b { z1.b } else { z2.b };
     let img_max = if z1.b > z2.b { z1.b } else { z2.b };
 
-    let height = ((re_max - re_min) /  (img_max - img_min) * width as f64).round() as u32;
+    let height = ((re_max - re_min) / (img_max - img_min) * width as f64).round() as u32;
 
     let x_delta = (re_max - re_min) / width as f64;
     let y_delta = (img_max - img_min) / height as f64;
