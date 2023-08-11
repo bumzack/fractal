@@ -69,6 +69,7 @@ pub async fn handle_request_single_threaded(req: FractalRequest) -> utils::Resul
     let response = FractalResponse {
         duration_calculation: format!("calculation single threaded took {:0.2} ms", duration),
         fractal,
+        duration_ms: duration,
     };
     let res = json(&response);
 
@@ -86,6 +87,7 @@ pub async fn handle_request_multi_threaded(req: FractalRequest) -> utils::Result
             duration, cores
         ),
         fractal,
+        duration_ms: duration,
     };
     let res = json(&response);
 
@@ -103,6 +105,7 @@ pub async fn handle_request_rayon(req: FractalRequest) -> utils::Result<impl Rep
     let response = FractalResponse {
         duration_calculation: format!("calculation  rayon threaded took {:0.2} ms", duration,),
         fractal,
+        duration_ms: duration,
     };
     let res = json(&response);
 

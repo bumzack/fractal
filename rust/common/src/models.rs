@@ -18,6 +18,7 @@ pub struct FractalRequest {
 #[derive(Deserialize, Serialize, Clone, Debug, Default, PartialEq)]
 pub struct FractalResponse {
     pub duration_calculation: String,
+    pub duration_ms: u128,
     pub fractal: FractalImage,
 }
 

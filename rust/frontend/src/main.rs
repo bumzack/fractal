@@ -2,9 +2,10 @@ use reqwasm::http::Request;
 use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
 use wasm_bindgen::prelude::*;
-use web_sys::{CanvasRenderingContext2d, ImageData};
+use web_sys::{
+    CanvasRenderingContext2d, HtmlCanvasElement, HtmlParagraphElement, ImageData, MouseEvent,
+};
 use web_sys::{ErrorEvent, MessageEvent, WebSocket};
-use web_sys::{HtmlCanvasElement, MouseEvent};
 
 use common::complex::ComplexNumber;
 use common::image_tile::TileData;
@@ -12,6 +13,7 @@ use common::models::{
     FractalRequest, FractalResponse, WebSocketCommand, WebSocketRequest, WebSocketResponse,
 };
 
+#[macro_export]
 macro_rules! console_log {
     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
@@ -19,54 +21,10 @@ macro_rules! console_log {
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
+    pub fn log(s: &str);
 }
 
-#[component]
-async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
-    // wtf   ¯\_(ツ)_/¯
-
-    let _app_state = use_context::<Signal<AppState>>(cx);
-    // let mut server = app_state.get().server.clone();
-
-    // let s = server
-    //     .drain(..)
-    //     .map(|s| s.get().as_ref().clone())
-    //     .collect::<Vec<ServerSource>>();
-
-    // let iter = create_signal(cx, s);
-
-    view! { cx,
-        div {
-
-        }
-        div {
-
-        }
-    }
-}
-
-#[component]
-async fn Header<G: Html>(cx: Scope<'_>) -> View<G> {
-    view! { cx,
-        header(class = "py-3 mb-3 border-bottom") {
-            div(class = "container-fluid d-grid gap-3 align-items-center", style ="rid-template-columns: 1fr 2fr;") {
-                span(class="navbar-brand mb-0 h1") {
-                    "FractalThingi"
-                }
-            }
-        }
-    }
-}
-
-const SERVER: &str = "http://localhost:3000";
-const API_URL_SINGLE_THREADED: &str = "/api/singlethreaded";
-const API_URL_MULTI_THREADED: &str = "/api/multithreaded";
-const API_URL_RAYON: &str = "/api/rayon";
-
-const JAVA_SERVER: &str = "http://localhost:4000";
-
-fn draw_to_canvas(
+pub fn draw_to_canvas(
     fractal_response: &FractalResponse,
     context: &CanvasRenderingContext2d,
     canvas: &HtmlCanvasElement,
@@ -87,6 +45,7 @@ fn draw_to_canvas(
         width,
         height
     );
+
     let mut data = image_data.data();
     for x in 0..width {
         for y in 0..height {
@@ -103,14 +62,14 @@ fn draw_to_canvas(
             .unwrap();
     let res = context.put_image_data(&data, 0.0, 0.0);
     match res {
-        Ok(r) => console_log!("writing data successfull "),
+        Ok(r) => console_log!("writing data successful"),
         Err(e) => console_log!("error writing image data {:?}", e),
     }
 
     console_log!("updated data");
 }
 
-fn draw_to_canvas_tiles(
+pub fn draw_to_canvas_tiles(
     tile: &TileData,
     context: &CanvasRenderingContext2d,
     width: u32,
@@ -153,17 +112,17 @@ fn draw_to_canvas_tiles(
     console_log!("updated canvas from tile");
 }
 
-fn clear_canvas(canvas: &HtmlCanvasElement) {
+pub fn clear_canvas(canvas: &HtmlCanvasElement) {
     canvas.set_width(0);
     canvas.set_height(0);
 }
 
-fn set_canvas_width_height(width: u32, height: u32, canvas: &HtmlCanvasElement) {
+pub fn set_canvas_width_height(width: u32, height: u32, canvas: &HtmlCanvasElement) {
     canvas.set_width(width);
     canvas.set_height(height);
 }
 
-fn get_canvas_context() -> (CanvasRenderingContext2d, HtmlCanvasElement) {
+pub fn get_canvas_context() -> (CanvasRenderingContext2d, HtmlCanvasElement) {
     let document = web_sys::window().unwrap().document().unwrap();
     let canvas = document.get_element_by_id("fractal_canvas").unwrap();
     let canvas: HtmlCanvasElement = canvas
@@ -181,6 +140,31 @@ fn get_canvas_context() -> (CanvasRenderingContext2d, HtmlCanvasElement) {
     let canvas = context.canvas().unwrap();
     (context, canvas)
 }
+
+pub fn set_info_text(fractal_response: FractalResponse, id: &str) {
+    console_log!("trying to find element id {id}");
+    let document = web_sys::window().unwrap().document().unwrap();
+    let p = document.get_element_by_id(id).unwrap();
+    let p: HtmlParagraphElement = p
+        .dyn_into::<HtmlParagraphElement>()
+        .map_err(|_| ())
+        .unwrap();
+
+    let pixels_per_msec = (fractal_response.fractal.height * fractal_response.fractal.width) as f64
+        / fractal_response.duration_ms as f64;
+    let txt = format!(
+        "Duration: {} ms, Speed: {:.4} Pixels / ms",
+        fractal_response.duration_ms, pixels_per_msec
+    );
+    p.set_inner_text(&txt);
+}
+
+const SERVER: &str = "http://localhost:3000";
+const API_URL_SINGLE_THREADED: &str = "/api/singlethreaded";
+const API_URL_MULTI_THREADED: &str = "/api/multithreaded";
+const API_URL_RAYON: &str = "/api/rayon";
+
+const JAVA_SERVER: &str = "http://localhost:4000";
 
 async fn post_single_threaded() -> Result<(), reqwasm::Error> {
     console_log!("post_single_threaded!");
@@ -207,9 +191,8 @@ async fn post_single_threaded() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("updated data");
-    //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
 
-    console_log!("json: {:?}", fractal_response);
+    set_info_text(fractal_response, "rust-single-threaded");
     Ok(())
 }
 
@@ -238,9 +221,8 @@ async fn post_multi_threaded() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("updated data");
-    //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
 
-    console_log!("json: {:?}", fractal_response);
+    set_info_text(fractal_response, "rust-multi-threaded");
     Ok(())
 }
 
@@ -269,9 +251,7 @@ async fn post_rayon() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("updated data");
-    //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
-
-    console_log!("json: {:?}", fractal_response);
+    set_info_text(fractal_response, "rust-rayon");
     Ok(())
 }
 
@@ -300,9 +280,7 @@ async fn post_single_java() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("image data written to canvas");
-    //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
-
-    // console_log!("json: {:?}", fractal_response);
+    set_info_text(fractal_response, "Java-single-threaded");
     Ok(())
 }
 
@@ -331,6 +309,7 @@ async fn post_multi_java() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("image data written to canvas");
+    set_info_text(fractal_response, "java-multi-threaded");
     Ok(())
 }
 
@@ -353,6 +332,7 @@ async fn post_crossbeam_tiled() {
     let mut height = 0;
     let mut cnt_height = 0;
     let mut cnt_tiles = 0;
+
     let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
         e.prevent_default();
 
@@ -452,8 +432,8 @@ async fn post_crossbeam_tiled() {
 
 fn dummy_request() -> FractalRequest {
     FractalRequest {
-        //z1: ComplexNumber { a: -2.0, b: 1.5 },
-        //z2: ComplexNumber { a: 1., b: -1.5 },
+        z1: ComplexNumber { a: -2.0, b: 1.5 },
+        z2: ComplexNumber { a: 1., b: -1.5 },
         // z1: ComplexNumber {
         //     a: -0.9444,
         //     b: -0.2747,
@@ -462,19 +442,19 @@ fn dummy_request() -> FractalRequest {
         //     a: -0.8216,
         //     b: -0.1826,
         // },
-        z1: ComplexNumber {
-            a: -1.4241,
-            b: 0.1581,
-        },
-        z2: ComplexNumber {
-            a: -1.4242,
-            b: 0.15822,
-        },
+        // z1: ComplexNumber {
+        //     a: -1.4241,
+        //     b: 0.1581,
+        // },
+        // z2: ComplexNumber {
+        //     a: -1.4242,
+        //     b: 0.15822,
+        // },
 
         // z1: ComplexNumber { a: -1.424240107, b:  0.1582373163},
         // z2: ComplexNumber { a:  -1.4242439848, b: 0.158237603 },
-        width: 600,
-        max_iterations: 1000,
+        width: 200,
+        max_iterations: 100,
         colors: 256,
         x_tiles: 10,
         y_tiles: 10,
@@ -486,6 +466,41 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
     //    let app_state = use_context::<Signal<AppState>>(cx);
 
     // , on:click=handle_save_stats
+
+    view! { cx,
+        div(class = "container-fluid") {
+            div(class = "row") {
+                div(class = "col-2") {
+                    div(class = "list-group",  id="list-example") {
+                        LeftNavItems
+                    }
+                }
+                div(class="col"){
+                    div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom") {
+                        h1(class="h1"){
+                            "Funny image"
+                        }
+                        div(class="btn-toolbar mb-2 mb-md-0"){
+                            div(class="btn-group me-2"){
+                            }
+                        }
+                    }
+                    div {
+                        div(class ="canvas-container"  ) {
+                            canvas(id="fractal_canvas", class="fractal-canvas" )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
+    // wtf   ¯\_(ツ)_/¯
+
+    // let _app_state = use_context::<Signal<AppState>>(cx);
 
     let start_singlethreaded = move |e: MouseEvent| {
         e.prevent_default();
@@ -585,66 +600,105 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
     };
 
     view! { cx,
-        div(class = "container-fluid") {
-            div(class = "row") {
-                div(class = "col-2") {
-                    div(class = "list-group",  id="list-example") {
-                        LeftNavItems
-                    }
+
+        div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="singlethreaded" ,on:click=start_singlethreaded) {
+                    "Single threaded"
                 }
-                div(class="col"){
-                    div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom") {
-                        // h1(class="h1"){
-                        //     "Source Servers bla"
-                        // }
-                        div(class="btn-toolbar mb-2 mb-md-0"){
-                            div(class="btn-group me-2"){
 
-                            }
-                        }
-                    }
-                    div(   ) {
-                        button(class="btn btn-primary", type="button", id="crossbeam", on:click=start_crossbeam_tiled){
-                                    "Start WebSocket"
-                        }
+                br {
 
-                        button(class="btn btn-primary", type="button", id="singlethreaded" ,on:click=start_singlethreaded){
-                                    "Start SingleThreaded"
-                        }
+                }
+                p(id = "rust-single-threaded") {
+                    "Duration:"
+                }
+            }
+        }
 
-                         button(class="btn btn-primary", type="button", id="multithreaded" ,on:click=start_multithreaded){
-                                    "Start Multi Threaded"
-                        }
+         div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="multithreaded" ,on:click=start_multithreaded) {
+                        "Multi threaded"
+                }
+                br {
 
+                }
+                p(id = "rust-multi-threaded") {
+                    "Duration:"
+                }
+            }
+        }
 
-                        button(class="btn btn-primary", type="button", id="multithreaded" ,on:click=start_rayon){
-                                    "Start Rayon"
-                        }
+         div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                 button(class="btn btn-primary", type="button", id="crossbeam", on:click=start_crossbeam_tiled) {
+                        "Crossbeam tiled"
+                 }
+                br {
 
-                         button(class="btn btn-primary", type="button", id="java_singlethreaded" ,on:click=start_java_single){
-                                    "Start Java single threaded"
-                        }
+                }
+                p(id = "crossbeam-tiled") {
+                    "Duration:"
+                }
+            }
+        }
 
-                         button(class="btn btn-primary", type="button", id="java_multithreaded" ,on:click=start_java_multi){
-                                    "Start Java multi threaded"
-                        }
+          div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="rayon" ,on:click=start_rayon){
+                    "Rayon"
+                }
+                br {
 
+                }
+                p(id = "rust-rayon") {
+                    "Duration:"
+                }
+            }
+        }
 
+          div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="java_singlethreaded" ,on:click=start_java_single){
+                            "Java single threaded"
+                }
+                br {
 
+                }
+                p(id = "java-single-threaded") {
+                    "Duration:"
+                }
+            }
+        }
 
+          div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                 button(class="btn btn-primary", type="button", id="java_multithreaded" ,on:click=start_java_multi){
+                            "Java multi threaded"
+                }
+                br {
 
-                        div(class ="canvas-container"  ) {
-                            canvas(id="fractal_canvas", class="fractal-canvas" )
-                        }
-                    }
+                }
+                p(id = "java-multi-threaded") {
+                    "Duration:"
                 }
             }
         }
     }
 }
 
-pub struct AppState {
-    name: RcSignal<String>,
+#[component]
+async fn Header<G: Html>(cx: Scope<'_>) -> View<G> {
+    view! { cx,
+        header(class = "py-3 mb-3 border-bottom") {
+            div(class = "container-fluid d-grid gap-3 align-items-center", style ="rid-template-columns: 1fr 2fr;") {
+                span(class="navbar-brand mb-0 h1") {
+                    "FractalThingi"
+                }
+            }
+        }
+    }
 }
 
 #[component]
@@ -673,6 +727,10 @@ async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
         }
 
     }
+}
+
+pub struct AppState {
+    name: RcSignal<String>,
 }
 
 fn main() {

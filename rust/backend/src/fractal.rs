@@ -281,8 +281,8 @@ pub fn calc_multi_threaded(
 
     let start = Instant::now();
 
-    let x_diff = z1.a.abs() + z2.a.abs();
-    let y_diff = z1.b.abs() + z2.b.abs();
+    // let x_diff = z1.a.abs() + z2.a.abs();
+    // let y_diff = z1.b.abs() + z2.b.abs();
 
     // x_diff : y_diff = width : height
     // height = x_diff*width / y_diff
