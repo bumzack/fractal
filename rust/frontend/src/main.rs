@@ -7,7 +7,7 @@ use web_sys::{
 };
 use web_sys::{ErrorEvent, MessageEvent, WebSocket};
 
-use common::complex::ComplexNumber;
+use common::fractal_templates::tree;
 use common::image_tile::TileData;
 use common::models::{
     FractalRequest, FractalResponse, WebSocketCommand, WebSocketRequest, WebSocketResponse,
@@ -345,15 +345,7 @@ async fn post_crossbeam_tiled() {
             if web_socket_response.is_ok() {
                 console_log!("got a valid WebSocketResponse  {}", &t);
                 let web_socket_response = web_socket_response.unwrap();
-                console_log!("web_socket_response   {:?}", &web_socket_response);
 
-                if web_socket_response.height.is_some() {
-                    height = web_socket_response.height.unwrap();
-                    cnt_height += 1;
-                    console_log!("cnt_height   {:?}     {}", cnt_height, height);
-                    let r = fractal_request.clone();
-                    set_canvas_width_height(r.width, web_socket_response.height.unwrap(), &canvas);
-                }
                 if web_socket_response.tile.is_some() {
                     cnt_tiles += 1;
 
@@ -364,17 +356,6 @@ async fn post_crossbeam_tiled() {
                         cnt_tiles
                     );
                     draw_to_canvas_tiles(&tile, &context, width, height);
-                }
-
-                let req = WebSocketRequest {
-                    command: WebSocketCommand::RENDERFRACTAL(fractal_request.clone()),
-                };
-
-                let req = serde_json::json!(req).to_string();
-                console_log!("sending string to server {}", &req);
-                match socket_clone.send_with_str(&req) {
-                    Ok(_) => console_log!("sending request to server to start sending tiles: message successfully sent"),
-                    Err(err) => console_log!("error sending message: {:?}", err),
                 }
             } else {
                 console_log!(
@@ -403,26 +384,17 @@ async fn post_crossbeam_tiled() {
     let cloned_ws = socket.clone();
     let onopen_callback = Closure::<dyn FnMut()>::new(move || {
         console_log!("socket opened");
-        // match cloned_ws.send_with_str("ping") {
-        //     Ok(_) => console_log!("message successfully sent"),
-        //     Err(err) => console_log!("error sending message: {:?}", err),
-        // }
-        // // send off binary message
-        // match cloned_ws.send_with_u8_array(&[0, 1, 2, 3]) {
-        //     Ok(_) => console_log!("binary message successfully sent"),
-        //     Err(err) => console_log!("error sending message: {:?}", err),
-        // }
 
-        // send off text message
-        let req = dummy_request();
         let req = WebSocketRequest {
-            command: WebSocketCommand::GETHEIGHT(req),
+            command: WebSocketCommand::RENDERFRACTAL(fractal_request.clone()),
         };
 
         let req = serde_json::json!(req).to_string();
         console_log!("sending string to server {}", &req);
         match cloned_ws.send_with_str(&req) {
-            Ok(_) => console_log!("sending request to server: message successfully sent"),
+            Ok(_) => console_log!(
+                "sending request to server to start sending tiles: message successfully sent"
+            ),
             Err(err) => console_log!("error sending message: {:?}", err),
         }
     });
@@ -431,42 +403,14 @@ async fn post_crossbeam_tiled() {
 }
 
 fn dummy_request() -> FractalRequest {
-    FractalRequest {
-        z1: ComplexNumber { a: -2.0, b: 1.5 },
-        z2: ComplexNumber { a: 1., b: -1.5 },
-        // z1: ComplexNumber {
-        //     a: -0.9444,
-        //     b: -0.2747,
-        // },
-        // z2: ComplexNumber {
-        //     a: -0.8216,
-        //     b: -0.1826,
-        // },
-        // z1: ComplexNumber {
-        //     a: -1.4241,
-        //     b: 0.1581,
-        // },
-        // z2: ComplexNumber {
-        //     a: -1.4242,
-        //     b: 0.15822,
-        // },
-
-        // z1: ComplexNumber { a: -1.424240107, b:  0.1582373163},
-        // z2: ComplexNumber { a:  -1.4242439848, b: 0.158237603 },
-        width: 200,
-        max_iterations: 100,
-        colors: 256,
-        x_tiles: 10,
-        y_tiles: 10,
-    }
+    let (mut request, _, _) = tree();
+    request.width = 1200;
+    request.height = 920;
+    request
 }
 
 #[component]
 async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
-    //    let app_state = use_context::<Signal<AppState>>(cx);
-
-    // , on:click=handle_save_stats
-
     view! { cx,
         div(class = "container-fluid") {
             div(class = "row") {
@@ -498,10 +442,6 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
 
 #[component]
 async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
-    // wtf   ¯\_(ツ)_/¯
-
-    // let _app_state = use_context::<Signal<AppState>>(cx);
-
     let start_singlethreaded = move |e: MouseEvent| {
         e.prevent_default();
         console_log!("start_singlethreaded  clicked.   event {:?}", e.target());
@@ -606,9 +546,7 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
                 button(class="btn btn-primary", type="button", id="singlethreaded" ,on:click=start_singlethreaded) {
                     "Single threaded"
                 }
-
                 br {
-
                 }
                 p(id = "rust-single-threaded") {
                     "Duration:"
@@ -622,7 +560,6 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
                         "Multi threaded"
                 }
                 br {
-
                 }
                 p(id = "rust-multi-threaded") {
                     "Duration:"
@@ -635,12 +572,11 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
                  button(class="btn btn-primary", type="button", id="crossbeam", on:click=start_crossbeam_tiled) {
                         "Crossbeam tiled"
                  }
-                br {
-
-                }
-                p(id = "crossbeam-tiled") {
+                 br {
+                 }
+                 p(id = "crossbeam-tiled") {
                     "Duration:"
-                }
+                 }
             }
         }
 
@@ -650,7 +586,6 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
                     "Rayon"
                 }
                 br {
-
                 }
                 p(id = "rust-rayon") {
                     "Duration:"
@@ -664,7 +599,6 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
                             "Java single threaded"
                 }
                 br {
-
                 }
                 p(id = "java-single-threaded") {
                     "Duration:"
@@ -678,7 +612,6 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
                             "Java multi threaded"
                 }
                 br {
-
                 }
                 p(id = "java-multi-threaded") {
                     "Duration:"

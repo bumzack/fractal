@@ -6,3 +6,6 @@ pub mod image_tile;
 pub mod models;
 pub mod rayon_image;
 pub mod utils;
+
+pub mod fractal_calculation;
+pub mod fractal_templates;
