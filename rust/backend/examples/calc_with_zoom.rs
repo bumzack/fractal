@@ -1,51 +1,68 @@
-use common::fractal_calculation::calc_multi_threaded;
-use std::time::Instant;
+use chrono::Utc;
+use common::{complex::ComplexNumber, fractal_calculation::calc_multi_threaded};
+use serde::Serialize;
+use serde_derive::Deserialize;
+use serde_json::json;
+use std::{
+    fs::{self, File},
+    io::Write,
+    time::Instant,
+};
 
 use common::models::FractalRequest;
 
 fn main() {
-    flower();
-    tendrils();
-    julia_island();
-    seahorse_valley();
-    sun();
-    tree();
-    starfish();
+    flower(true);
+    // tendrils(false);
+    // julia_island(false);
+    // seahorse_valley(false);
+    // sun(false);
+    // tree(false);
+    // starfish(false);
 }
 
-fn flower() {
-    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::flower();
+fn flower(debug: bool) {
+    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::flower(debug);
     render(req, zoom_factor, max_zoom_factor);
 }
 
-fn tendrils() {
-    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::tendrils();
+fn tendrils(debug: bool) {
+    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::tendrils(debug);
     render(req, zoom_factor, max_zoom_factor);
 }
 
-fn julia_island() {
-    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::julia_island();
+fn julia_island(debug: bool) {
+    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::julia_island(debug);
     render(req, zoom_factor, max_zoom_factor);
 }
 
-fn seahorse_valley() {
-    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::seahorse_valley();
+fn seahorse_valley(debug: bool) {
+    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::seahorse_valley(debug);
     render(req, zoom_factor, max_zoom_factor);
 }
 
-fn starfish() {
-    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::starfish();
+fn starfish(debug: bool) {
+    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::starfish(debug);
     render(req, zoom_factor, max_zoom_factor);
 }
 
-fn sun() {
-    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::sun();
+fn sun(debug: bool) {
+    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::sun(debug);
     render(req, zoom_factor, max_zoom_factor);
 }
 
-fn tree() {
-    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::tree();
+fn tree(debug: bool) {
+    let (req, zoom_factor, max_zoom_factor) = common::fractal_templates::tree(debug);
     render(req, zoom_factor, max_zoom_factor);
+}
+
+#[derive(Serialize, Deserialize)]
+struct FractalData {
+    req: FractalRequest,
+    zoom_factor: f64,
+    max_zoom_factor: f64,
+    tl: ComplexNumber,
+    br: ComplexNumber,
 }
 
 fn render(mut req: FractalRequest, zoom_factor: f64, max_zoom_factor: f64) {
@@ -58,7 +75,6 @@ fn render(mut req: FractalRequest, zoom_factor: f64, max_zoom_factor: f64) {
     let start = Instant::now();
 
     while req.zoom < max_zoom_factor {
-        // 6591292.0
         let c_w = complex_width / req.zoom;
         let (_, duration, cores) = calc_multi_threaded(
             &req.center,
@@ -75,8 +91,52 @@ fn render(mut req: FractalRequest, zoom_factor: f64, max_zoom_factor: f64) {
             "name:  {} duration {duration},   cores {cores},     zoom {}",
             req.name, req.zoom
         );
+
+        let ratio = width as f64 / height as f64;
+        let complex_height = complex_width / ratio;
+
+        let re_min = req.center.a - req.complex_width / 2.0;
+        let re_max = req.center.a + req.complex_width / 2.0;
+
+        let img_min = req.center.b - complex_height / 2.0;
+        let img_max = req.center.b + complex_height / 2.0;
+
+        let tl = ComplexNumber {
+            a: re_min,
+            b: img_max,
+        };
+        let br = ComplexNumber {
+            a: re_max,
+            b: img_min,
+        };
+
+        let fractal_data = FractalData {
+            req: req.clone(),
+            zoom_factor,
+            max_zoom_factor,
+            tl,
+            br,
+        };
+
+        let json = serde_json::to_string_pretty(&json!(&fractal_data)).unwrap();
+
+        let path = get_filename(&req.name);
+
+        let mut f = File::create(path).expect("Unable to create file");
+        f.write_all(json.as_bytes()).expect("Unable to write data");
         req.zoom = req.zoom * zoom_factor;
     }
 
     println!("rendering took {} seconds", start.elapsed().as_secs_f64());
+}
+
+fn get_filename(name: &str) -> String {
+    let now = Utc::now();
+
+    let path = env!("CARGO_MANIFEST_DIR");
+    // println!("CARGO_MANIFEST_DIR   {path}");
+    let path = format!("{}/../../images/{}", path, name);
+    fs::create_dir_all(&path).expect("create dir should work");
+
+    format!("{}/{}_fractal_{}.json", path, name, now.timestamp_millis(),)
 }

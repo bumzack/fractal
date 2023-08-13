@@ -62,7 +62,7 @@ pub fn draw_to_canvas(
             .unwrap();
     let res = context.put_image_data(&data, 0.0, 0.0);
     match res {
-        Ok(r) => console_log!("writing data successful"),
+        Ok(_) => console_log!("writing data successful"),
         Err(e) => console_log!("error writing image data {:?}", e),
     }
 
@@ -105,7 +105,7 @@ pub fn draw_to_canvas_tiles(
             .unwrap();
     let res = context.put_image_data(&data, 0.0, 0.0);
     match res {
-        Ok(r) => console_log!("writing data form tile successfull "),
+        Ok(_r) => console_log!("writing data form tile successfull "),
         Err(e) => console_log!("error writing tile image data {:?}", e),
     }
 
@@ -326,11 +326,10 @@ async fn post_crossbeam_tiled() {
         Err(e) => panic!("cant open websocket    err {:?}", e),
     };
 
-    let socket_clone = socket.clone();
+    // let socket_clone = socket.clone();
     let fractal_request = dummy_request();
     let width = fractal_request.width;
-    let mut height = 0;
-    let mut cnt_height = 0;
+    let  height = 0;
     let mut cnt_tiles = 0;
 
     let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
@@ -403,9 +402,8 @@ async fn post_crossbeam_tiled() {
 }
 
 fn dummy_request() -> FractalRequest {
-    let (mut request, _, _) = tree();
-    request.width = 1200;
-    request.height = 920;
+    let (  request, _, _) = tree(true);
+ 
     request
 }
 
@@ -449,7 +447,7 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
             async move {
                 let res = post_single_threaded().await;
                 match res {
-                    Ok(response) => {
+                    Ok(_) => {
                         console_log!("all good");
                     }
                     Err(e) => {
@@ -467,7 +465,7 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
             async move {
                 let res = post_multi_threaded().await;
                 match res {
-                    Ok(response) => {
+                    Ok(_) => {
                         console_log!("all good");
                     }
                     Err(e) => {
@@ -485,7 +483,7 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
             async move {
                 let res = post_rayon().await;
                 match res {
-                    Ok(response) => {
+                    Ok(_) => {
                         console_log!("all good");
                     }
                     Err(e) => {
@@ -511,7 +509,7 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
             async move {
                 let res = post_single_java().await;
                 match res {
-                    Ok(response) => {
+                    Ok(_) => {
                         console_log!("all good");
                     }
                     Err(e) => {
@@ -528,7 +526,7 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
             async move {
                 let res = post_multi_java().await;
                 match res {
-                    Ok(response) => {
+                    Ok(_) => {
                         console_log!("all good");
                     }
                     Err(e) => {
@@ -637,7 +635,7 @@ async fn Header<G: Html>(cx: Scope<'_>) -> View<G> {
 #[component]
 async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
     let app_state = AppState {
-        name: create_rc_signal("yoyo".to_string()),
+        _name: create_rc_signal("yoyo".to_string()),
     };
 
     let app_state = create_signal(cx, app_state);
@@ -663,7 +661,7 @@ async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
 }
 
 pub struct AppState {
-    name: RcSignal<String>,
+    _name: RcSignal<String>,
 }
 
 fn main() {

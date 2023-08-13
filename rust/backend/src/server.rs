@@ -1,5 +1,6 @@
 use std::time::Instant;
 
+use common::complex::ComplexNumber;
 use crossbeam_channel::unbounded;
 use futures_util::{SinkExt, StreamExt, TryFutureExt};
 use log::{error, info};
@@ -146,7 +147,7 @@ async fn handle_request_crossbeam_tiles(ws: WebSocket) {
     let w = websocket_rx.next().await.unwrap();
     let (sender_crossbeam_channel, recv_crossbeam_channel) = unbounded::<TileData>();
 
-    let w = websocket_rx.next().await.unwrap();
+    //let w = websocket_rx.next().await.unwrap();
 
     match w {
         Ok(msg) => {
@@ -232,12 +233,16 @@ async fn handle_request_crossbeam_tiles(ws: WebSocket) {
                                         .await;
                                     // cnt += 1;
                                 }
+                                let tl = ComplexNumber::default();
+                                let br = ComplexNumber::default();
 
                                 save_png2(
                                     &fractal_image.pixels,
                                     fractal_image.width,
                                     fractal_image.height,
                                     &re.center,
+                                    &tl,
+                                    &br,
                                     re.zoom,
                                     re.max_iterations,
                                     re.name,

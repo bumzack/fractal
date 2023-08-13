@@ -4,7 +4,7 @@ use crate::fractal::calc_fractal_color;
 use crate::fractal_image::FractalImage;
 use crate::image_tile::{tiles, TileData, TileDataPoint};
 use crate::rayon_image::Pixel;
-use crate::utils::{save_png, save_png2};
+use crate::utils::save_png2;
 use crossbeam_channel::Sender;
 use log::{error, info};
 use rayon::prelude::IntoParallelRefMutIterator;
@@ -79,7 +79,26 @@ pub fn calc_single_threaded(
 
     let duration = start.elapsed().as_millis();
 
-    save_png2(&pixels, width, height, &center, zoom, max_iterations, name);
+    let tl = ComplexNumber {
+        a: re_min,
+        b: img_max,
+    };
+    let br = ComplexNumber {
+        a: re_max,
+        b: img_min,
+    };
+
+    save_png2(
+        &pixels,
+        width,
+        height,
+        &center,
+        &tl,
+        &br,
+        zoom,
+        max_iterations,
+        name,
+    );
 
     let fractal = FractalImage {
         width,
@@ -229,11 +248,22 @@ pub fn calc_multi_threaded(
     let mutex = Arc::try_unwrap(pixels).unwrap();
     let pixelssss = mutex.into_inner().unwrap();
 
+    let tl = ComplexNumber {
+        a: re_min,
+        b: img_max,
+    };
+    let br = ComplexNumber {
+        a: re_max,
+        b: img_min,
+    };
+
     save_png2(
         &pixelssss,
         width,
         height,
         &center,
+        &tl,
+        &br,
         zoom,
         max_iterations,
         name,
@@ -256,7 +286,7 @@ pub fn calc_multi_threaded_crossbeam_tiles(
     height: u32,
     max_iterations: u32,
     colors: u32,
-    name: String,
+    _name: String,
     x_tiles: u32,
     y_tiles: u32,
     sender: Sender<TileData>,
@@ -278,10 +308,6 @@ pub fn calc_multi_threaded_crossbeam_tiles(
         max_iterations,
     );
 
-    let cores = num_cpus::get();
-
-    let start = Instant::now();
-
     let re_min = center.a - complex_width / 2.0;
     let re_max = center.a + complex_width / 2.0;
 
@@ -296,12 +322,9 @@ pub fn calc_multi_threaded_crossbeam_tiles(
     info!("x_delta {},   y_delta {}   width {}  height {},  max_iterations {},  re_min {}, re_max {}, img_min {}, img_max {}" ,
         x_delta, y_delta, width,  height, max_iterations, re_min, re_max, img_min, img_max);
 
-    let pixels = vec![Color::default(); width as usize * height as usize];
+    //let pixels = vec![Color::default(); width as usize * height as usize];
 
-    let y_global = 0;
-
-    let pixels = Arc::new(Mutex::new(pixels));
-    let y_global = Arc::new(Mutex::new(y_global));
+    // let y_global = 0;
 
     let tiles = tiles(width, height, x_tiles, y_tiles);
     let tiles = Arc::new(Mutex::new(tiles));
@@ -414,8 +437,6 @@ pub fn calc_rayon(
         max_iterations,
     );
 
-    let cores = num_cpus::get();
-
     let start = Instant::now();
 
     let re_min = center.a - complex_width / 2.0;
@@ -431,8 +452,6 @@ pub fn calc_rayon(
 
     info!("x_delta {},   y_delta {}   width {}  height {},  max_iterations {},  re_min {}, re_max {}, img_min {}, img_max {}" ,
         x_delta, y_delta, width,  height, max_iterations, re_min, re_max, img_min, img_max);
-
-    let pixels = vec![Color::default(); width as usize * height as usize];
 
     let mut pixels = vec![];
     for y in 0..height {
@@ -467,7 +486,26 @@ pub fn calc_rayon(
 
     let duration = start.elapsed().as_millis();
 
-    save_png(&pixels, width, height);
+    let tl = ComplexNumber {
+        a: re_min,
+        b: img_max,
+    };
+    let br = ComplexNumber {
+        a: re_max,
+        b: img_min,
+    };
+
+    save_png2(
+        &pixels,
+        width,
+        height,
+        &center,
+        &tl,
+        &br,
+        zoom,
+        max_iterations,
+        name,
+    );
 
     let fractal = FractalImage {
         width,
