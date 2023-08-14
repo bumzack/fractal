@@ -7,7 +7,7 @@ use web_sys::{
 };
 use web_sys::{ErrorEvent, MessageEvent, WebSocket};
 
-use common::fractal_templates::{julia_island, tree};
+use common::fractal_templates::julia_island;
 use common::image_tile::TileData;
 use common::models::{
     FractalRequest, FractalResponse, WebSocketCommand, WebSocketRequest, WebSocketResponse,
@@ -31,6 +31,7 @@ pub fn draw_to_canvas(
 ) {
     let width = fractal_response.fractal.width;
     let height = fractal_response.fractal.height;
+    console_log!("width {}   height {}", width, height);
 
     set_canvas_width_height(width, height, canvas);
 
@@ -330,14 +331,16 @@ async fn post_crossbeam_tiled() {
     // let socket_clone = socket.clone();
     let fractal_request = dummy_request();
     let width = fractal_request.width;
-    let height = 0;
+    let height = fractal_request.height;
+    set_canvas_width_height(width, height, &canvas);
+
     let mut cnt_tiles = 0;
 
     let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
         e.prevent_default();
 
         if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
-            console_log!("message event, received Text: {:?}", txt);
+            // console_log!("message event, received Text: {:?}", txt);
             let t = txt.as_string().unwrap();
             let web_socket_response: serde_json::error::Result<WebSocketResponse> =
                 serde_json::from_str(&t);

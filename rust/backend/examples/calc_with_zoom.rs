@@ -12,13 +12,13 @@ use std::{
 use common::models::FractalRequest;
 
 fn main() {
-    // flower(false);
-    // tendrils(false);
+    flower(false);
+    tendrils(false);
     seahorse_valley(false);
     sun(false);
     tree(false);
     starfish(false);
-    // julia_island(false);
+    julia_island(false);
 }
 
 fn flower(debug: bool) {
@@ -66,11 +66,11 @@ struct FractalData {
 }
 
 fn render(mut req: FractalRequest, zoom_factor: f64, max_zoom_factor: f64) {
-    let width: u32 = 4096;
-    let height: u32 = 2160;
+    let width: u32 = req.width;
+    let height: u32 = req.height;
 
     // -4.0 ... 1.3
-    let complex_width = 5.3;
+    let complex_width = req.complex_width;
 
     let start = Instant::now();
 
@@ -83,7 +83,7 @@ fn render(mut req: FractalRequest, zoom_factor: f64, max_zoom_factor: f64) {
             width,
             height,
             req.max_iterations,
-            256,
+            req.colors,
             req.name.to_string(),
         );
 
