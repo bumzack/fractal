@@ -119,6 +119,7 @@ pub fn calc_multi_threaded(
     colors: u32,
     name: String,
 ) -> (FractalImage, u128, usize) {
+    let complex_width = complex_width / zoom;
     let ratio = width as f64 / height as f64;
     let complex_height = complex_width / ratio;
 

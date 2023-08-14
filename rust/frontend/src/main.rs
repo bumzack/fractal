@@ -7,7 +7,7 @@ use web_sys::{
 };
 use web_sys::{ErrorEvent, MessageEvent, WebSocket};
 
-use common::fractal_templates::tree;
+use common::fractal_templates::{julia_island, tree};
 use common::image_tile::TileData;
 use common::models::{
     FractalRequest, FractalResponse, WebSocketCommand, WebSocketRequest, WebSocketResponse,
@@ -203,6 +203,7 @@ async fn post_multi_threaded() -> Result<(), reqwasm::Error> {
 
     let fractal_request = dummy_request();
     let fractal_request = serde_json::json!(fractal_request).to_string();
+    console_log!("post_multi_threaded!    {}", fractal_request);
 
     let url = format!("{}{}", SERVER, API_URL_MULTI_THREADED);
 
@@ -329,7 +330,7 @@ async fn post_crossbeam_tiled() {
     // let socket_clone = socket.clone();
     let fractal_request = dummy_request();
     let width = fractal_request.width;
-    let  height = 0;
+    let height = 0;
     let mut cnt_tiles = 0;
 
     let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
@@ -402,8 +403,8 @@ async fn post_crossbeam_tiled() {
 }
 
 fn dummy_request() -> FractalRequest {
-    let (  request, _, _) = tree(true);
- 
+    let (request, _, _) = julia_island(true);
+
     request
 }
 
