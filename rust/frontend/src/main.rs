@@ -31,6 +31,7 @@ pub fn draw_to_canvas(
 ) {
     let width = fractal_response.fractal.width;
     let height = fractal_response.fractal.height;
+    console_log!("width {}   height {}", width, height);
 
     set_canvas_width_height(width, height, canvas);
 
@@ -203,6 +204,7 @@ async fn post_multi_threaded() -> Result<(), reqwasm::Error> {
 
     let fractal_request = dummy_request();
     let fractal_request = serde_json::json!(fractal_request).to_string();
+    console_log!("post_multi_threaded!    {}", fractal_request);
 
     let url = format!("{}{}", SERVER, API_URL_MULTI_THREADED);
 
@@ -358,14 +360,16 @@ async fn post_crossbeam_tiled() {
     // let socket_clone = socket.clone();
     let fractal_request = dummy_request();
     let width = fractal_request.width;
-    let height = 0;
+    let height = fractal_request.height;
+    set_canvas_width_height(width, height, &canvas);
+
     let mut cnt_tiles = 0;
 
     let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
         e.prevent_default();
 
         if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
-            console_log!("message event, received Text: {:?}", txt);
+            // console_log!("message event, received Text: {:?}", txt);
             let t = txt.as_string().unwrap();
             let web_socket_response: serde_json::error::Result<WebSocketResponse> =
                 serde_json::from_str(&t);
@@ -432,7 +436,6 @@ async fn post_crossbeam_tiled() {
 
 fn dummy_request() -> FractalRequest {
     let (request, _, _) = basic(true);
-
     request
 }
 
