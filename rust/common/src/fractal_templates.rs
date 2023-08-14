@@ -98,7 +98,7 @@ pub fn julia_island(debug: bool) -> (FractalRequest, f64, f64) {
 
     let mut zoom = 1.0;
     let mut max_iterations: u32 = 50_000;
-    let mut zoom_factor = 1.01;
+    let mut zoom_factor = 1.05;
     let mut max_zoom_factor = 50_000_000_000.0;
 
     let mut width: u32 = 4096;

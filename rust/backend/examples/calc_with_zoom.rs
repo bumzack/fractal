@@ -12,13 +12,13 @@ use std::{
 use common::models::FractalRequest;
 
 fn main() {
-    flower(false);
-    tendrils(false);
-    julia_island(false);
+    // flower(false);
+    // tendrils(false);
     seahorse_valley(false);
     sun(false);
     tree(false);
     starfish(false);
+    // julia_island(false);
 }
 
 fn flower(debug: bool) {
