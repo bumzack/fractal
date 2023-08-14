@@ -13,7 +13,7 @@ pub fn basic(debug: bool) -> (FractalRequest, f64, f64) {
     let mut height: u32 = 2160;
 
     if debug {
-        zoom = 0.3;
+        zoom = 0.7;
         max_iterations = 1000;
         zoom_factor = 1.0;
         max_zoom_factor = 50_000_000.0;

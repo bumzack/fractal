@@ -10,7 +10,6 @@ public class MultiThreadedCalculation implements Runnable {
     private final int height;
     private final double reMin;
     private final double imgMin;
-    private Thread t;
     private final String threadName;
     private final FractalRequest fractalRequest;
     private final double xDelta;
@@ -18,6 +17,7 @@ public class MultiThreadedCalculation implements Runnable {
     private final int maxIterations;
     private final List<Color> colors;
     private final List<Color> pixels;
+    private Thread t;
 
 
     public MultiThreadedCalculation(final String threadName,

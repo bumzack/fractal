@@ -56,7 +56,7 @@ public class FractalController {
         return res;
     }
 
-    @PostMapping("/api/multithreadedvirtual")
+    @PostMapping("/api/multithreaded/virtual")
     @ResponseBody
     public FractalResponse multiThreadedVirtual(@RequestBody final FractalRequest request) throws IOException, URISyntaxException, InterruptedException {
         final Gson gson = new GsonBuilder()

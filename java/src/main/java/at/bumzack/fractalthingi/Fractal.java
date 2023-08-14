@@ -62,11 +62,13 @@ public class Fractal {
             final var co = Color.from(c.rgb.r, c.rgb.g, c.rgb.b);
             colors.add(co);
         });
-        final double ratio = (double) request.width / request.height;
-        final double complexHeight = request.getComplexWidth() / ratio;
 
-        final double reMin = request.getCenter().getA() - request.getComplexWidth() / 2.0;
-        final double reMax = request.getCenter().getA() + request.getComplexWidth() / 2.0;
+        final var complexWidth = request.complexWidth / request.zoom;
+        final double ratio = (double) request.width / request.height;
+        final double complexHeight = complexWidth / ratio;
+
+        final double reMin = request.getCenter().getA() - complexWidth / 2.0;
+        final double reMax = request.getCenter().getA() + complexWidth / 2.0;
 
         final double imgMin = request.getCenter().getB() - complexHeight / 2.0;
         final double imgMax = request.getCenter().getB() + complexHeight / 2.0;
@@ -117,11 +119,12 @@ public class Fractal {
             colors.add(co);
         });
 
+        final var complexWidth = request.complexWidth / request.zoom;
         final double ratio = (double) request.width / request.height;
-        final double complexHeight = request.getComplexWidth() / ratio;
+        final double complexHeight = complexWidth / ratio;
 
-        final double reMin = request.getCenter().getA() - request.getComplexWidth() / 2.0;
-        final double reMax = request.getCenter().getA() + request.getComplexWidth() / 2.0;
+        final double reMin = request.getCenter().getA() - complexWidth / 2.0;
+        final double reMax = request.getCenter().getA() + complexWidth / 2.0;
 
         final double imgMin = request.getCenter().getB() - complexHeight / 2.0;
         final double imgMax = request.getCenter().getB() + complexHeight / 2.0;
@@ -130,13 +133,12 @@ public class Fractal {
         final double yDelta = (imgMax - imgMin) / request.height;
 
         final var threads = new ArrayList<MultiThreadedCalculation>();
-
         final var pixels = new ArrayList<>(Collections.nCopies(request.getWidth() * request.getHeight(), BLACK));
 
         System.out.println("calc_image_multithreaded.  width " + request.width + ", height " + request.height + ", pixels.size " + pixels.size());
 
         for (int i = 0; i < cores; i++) {
-            final MultiThreadedCalculation t = new MultiThreadedCalculation("Thread-" + i, request, request.height, reMin, reMax, xDelta, yDelta, request.maxIterations, colors, pixels);
+            final MultiThreadedCalculation t = new MultiThreadedCalculation("Thread-" + i, request, request.height, reMin, imgMin, xDelta, yDelta, request.maxIterations, colors, pixels);
             threads.add(t);
         }
 

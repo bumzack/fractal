@@ -323,7 +323,7 @@ async fn post_multi_java_virtual() -> Result<(), reqwasm::Error> {
 
     let fractal_request = dummy_request();
     let fractal_request = serde_json::json!(fractal_request).to_string();
-    let url = format!("{}{}", JAVA_SERVER, API_URL_MULTI_THREADED);
+    let url = format!("{}{}/{}", JAVA_SERVER, API_URL_MULTI_THREADED, "virtual");
 
     let re = Request::post(&url)
         .body(fractal_request)

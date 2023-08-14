@@ -23,6 +23,7 @@ pub fn calc_single_threaded(
     colors: u32,
     name: String,
 ) -> (FractalImage, u128) {
+    let complex_width = complex_width / zoom;
     let ratio = width as f64 / height as f64;
     let complex_height = complex_width / ratio;
 
@@ -295,6 +296,7 @@ pub fn calc_multi_threaded_crossbeam_tiles(
     let cores = num_cpus::get();
     let start = Instant::now();
 
+    let complex_width = complex_width / zoom;
     let ratio = width as f64 / height as f64;
     let complex_height = complex_width / ratio;
 
@@ -424,6 +426,7 @@ pub fn calc_rayon(
         _ => panic!("number of colors not supported {}", colors),
     };
 
+    let complex_width = complex_width / zoom;
     let ratio = width as f64 / height as f64;
     let complex_height = complex_width / ratio;
 
