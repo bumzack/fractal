@@ -1,17 +1,20 @@
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Instant;
+
+use crossbeam_channel::Sender;
+use log::{error, info};
+use rayon::prelude::IntoParallelRefMutIterator;
+use rayon::prelude::ParallelIterator;
+
 use crate::color::{color16, color256, Color};
 use crate::complex::ComplexNumber;
 use crate::fractal::calc_fractal_color;
 use crate::fractal_image::FractalImage;
 use crate::image_tile::{tiles, TileData, TileDataPoint};
+use crate::palette::read_palette;
 use crate::rayon_image::Pixel;
 use crate::utils::save_png2;
-use crossbeam_channel::Sender;
-use log::{error, info};
-use rayon::prelude::IntoParallelRefMutIterator;
-use rayon::prelude::ParallelIterator;
-use std::sync::{Arc, Mutex};
-use std::thread;
-use std::time::Instant;
 
 pub fn calc_single_threaded(
     center: &ComplexNumber,
@@ -124,6 +127,8 @@ pub fn calc_multi_threaded(
     let ratio = width as f64 / height as f64;
     let complex_height = complex_width / ratio;
 
+    let palette = read_palette();
+
     print_debug(
         width,
         height,
@@ -164,8 +169,8 @@ pub fn calc_multi_threaded(
 
     for _ in 0..cores {
         let colors: Vec<Color> = match colors {
-            16 => color16(),
-            256 => color256(),
+            16 => palette.get("wild.map").unwrap().clone(),
+            256 => palette.get("neon.map").unwrap().clone(),
             _ => panic!("number of colors not supported {}", colors),
         };
 
