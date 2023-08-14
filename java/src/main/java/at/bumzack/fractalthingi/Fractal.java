@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import org.springframework.data.util.Pair;
 import org.springframework.util.StopWatch;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,15 +45,15 @@ public class Fractal {
         final var start = new StopWatch();
         start.start();
 
-        // final var r = new ClassPathResource("classpath:/resources/256-colors.json");
-        //  final var f = r.getFile();
-
-        final URL resource = Fractal.class.getClassLoader().getResource("256-colors.json");
-        final var f = new File(resource.toURI());
-        // final var r = Fractal.class.getClassLoader().getResource("256-colors.json");
-        //  final var f = new File(r.toURI());
-
-        final String json = new String(Files.readAllBytes(f.toPath()));
+        final var is = Fractal.class.getClassLoader().getResourceAsStream("256-colors.json");
+        final StringBuilder textBuilder = new StringBuilder();
+        try (final Reader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            int c = 0;
+            while ((c = reader.read()) != -1) {
+                textBuilder.append((char) c);
+            }
+        }
+        final var json = textBuilder.toString();
 
         final Gson gson = new Gson(); // Or use new GsonBuilder().create();
         final List<FileColor> fileColors = List.of(gson.fromJson(json, FileColor[].class));
@@ -106,10 +106,15 @@ public class Fractal {
         start.start();
 
 //        final var r = new ClassPathResource("classpath:/resources/256-colors.json");
-        final var r = Fractal.class.getClassLoader().getResource("256-colors.json");
-        final var f = new File(r.toURI());
-
-        final String json = new String(Files.readAllBytes(f.toPath()));
+        final var is = Fractal.class.getClassLoader().getResourceAsStream("256-colors.json");
+        final StringBuilder textBuilder = new StringBuilder();
+        try (final Reader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            int c = 0;
+            while ((c = reader.read()) != -1) {
+                textBuilder.append((char) c);
+            }
+        }
+        final var json = textBuilder.toString();
 
         final Gson gson = new Gson(); // Or use new GsonBuilder().create();
         final List<FileColor> fileColors = List.of(gson.fromJson(json, FileColor[].class));
