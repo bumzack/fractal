@@ -45,3 +45,17 @@ curl -X POST  http://localhost:3000/api/rayon -d '{ "colors": 256,   "max_iterat
 Download json and put it in the root folder of the project
 
 https://www.ditig.com/downloads/256-colors.json
+
+
+
+## Java
+
+
+```
+  mvn clean verify
+```
+
+
+```
+java --enable-preview -jar target/Fractal-Thingi-0.0.1-SNAPSHOT.jar
+```
