@@ -1,6 +1,47 @@
 use crate::complex::ComplexNumber;
 use crate::models::FractalRequest;
 
+pub fn basic(debug: bool) -> (FractalRequest, f64, f64) {
+    let center = ComplexNumber { a: -0.8, b: 0.0 };
+
+    let mut zoom = 1.0;
+    let mut max_iterations: u32 = 50_000;
+    let mut zoom_factor = 1.01;
+    let mut max_zoom_factor = 50_000_000_000.0;
+
+    let mut width: u32 = 4096;
+    let mut height: u32 = 2160;
+
+    if debug {
+        zoom = 0.3;
+        max_iterations = 1000;
+        zoom_factor = 1.0;
+        max_zoom_factor = 50_000_000.0;
+
+        width = 800;
+        height = 600;
+    }
+
+    let complex_width = 3.1;
+
+    let colors = 256;
+
+    let req = FractalRequest {
+        center,
+        width,
+        height,
+        complex_width,
+        max_iterations,
+        colors,
+        x_tiles: 10,
+        y_tiles: 10,
+        zoom,
+        name: "basic".to_string(),
+    };
+
+    (req, zoom_factor, max_zoom_factor)
+}
+
 pub fn flower(debug: bool) -> (FractalRequest, f64, f64) {
     let center = ComplexNumber {
         a: -1.999985882,

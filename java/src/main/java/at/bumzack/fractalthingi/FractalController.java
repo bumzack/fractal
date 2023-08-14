@@ -14,6 +14,7 @@ import java.net.URISyntaxException;
 
 import static at.bumzack.fractalthingi.Fractal.calc_image_multithreaded;
 import static at.bumzack.fractalthingi.Fractal.calc_image_singlethreaded;
+import static at.bumzack.fractalthingi.FractalVirtualThreads.calc_image_multithreaded_virtual_threads;
 
 
 @Controller
@@ -51,6 +52,24 @@ public class FractalController {
         final var res = new FractalResponse();
         res.fractal = img.getFirst();
         res.durationCalculation = String.format("java multiThreaded took %s ms", img.getSecond());
+        res.durationMs = img.getSecond();
+        return res;
+    }
+
+    @PostMapping("/api/multithreadedvirtual")
+    @ResponseBody
+    public FractalResponse multiThreadedVirtual(@RequestBody final FractalRequest request) throws IOException, URISyntaxException, InterruptedException {
+        final Gson gson = new GsonBuilder()
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .create();
+        final String json = gson.toJson(request);
+
+        System.out.println("request in controller " + json);
+        final Pair<FractalImage, Long> img = calc_image_multithreaded_virtual_threads(request);
+
+        final var res = new FractalResponse();
+        res.fractal = img.getFirst();
+        res.durationCalculation = String.format("java multiThreaded  virtual threads took %s ms", img.getSecond());
         res.durationMs = img.getSecond();
         return res;
     }

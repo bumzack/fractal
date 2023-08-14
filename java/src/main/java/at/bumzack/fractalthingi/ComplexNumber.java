@@ -4,6 +4,9 @@ public class ComplexNumber {
     double a;
     double b;
 
+    public ComplexNumber() {
+    }
+
     public double lengthSquared() {
         return a * a + b * b;
     }
@@ -22,9 +25,6 @@ public class ComplexNumber {
         return result;
     }
 
-    public ComplexNumber() {
-    }
-
     public double getA() {
         return a;
     }
@@ -39,5 +39,13 @@ public class ComplexNumber {
 
     public void setB(final double b) {
         this.b = b;
+    }
+
+    @Override
+    public String toString() {
+        return "ComplexNumber{" +
+                "a=" + a +
+                ", b=" + b +
+                '}';
     }
 }

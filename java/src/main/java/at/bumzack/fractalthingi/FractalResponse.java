@@ -6,6 +6,8 @@ public class FractalResponse {
     @JsonProperty("duration_calculation")
     String durationCalculation;
     FractalImage fractal;
+    @JsonProperty("duration_ms")
+    Long durationMs;
 
     public FractalResponse() {
     }

@@ -1,15 +1,13 @@
+use std::fs::create_dir_all;
+use std::{fs::File, io::Write, time::Instant};
+
 use chrono::Utc;
-use common::{complex::ComplexNumber, fractal_calculation::calc_multi_threaded};
 use serde::Serialize;
 use serde_derive::Deserialize;
 use serde_json::json;
-use std::{
-    fs::{self, File},
-    io::Write,
-    time::Instant,
-};
 
 use common::models::FractalRequest;
+use common::{complex::ComplexNumber, fractal_calculation::calc_multi_threaded};
 
 fn main() {
     flower(false);
@@ -136,7 +134,7 @@ fn get_filename(name: &str) -> String {
     let path = env!("CARGO_MANIFEST_DIR");
     // println!("CARGO_MANIFEST_DIR   {path}");
     let path = format!("{}/../../images/{}", path, name);
-    fs::create_dir_all(&path).expect("create dir should work");
+    create_dir_all(&path).expect("create dir should work");
 
     format!("{}/{}_fractal_{}.json", path, name, now.timestamp_millis(),)
 }

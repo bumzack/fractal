@@ -7,7 +7,7 @@ use web_sys::{
 };
 use web_sys::{ErrorEvent, MessageEvent, WebSocket};
 
-use common::fractal_templates::tree;
+use common::fractal_templates::basic;
 use common::image_tile::TileData;
 use common::models::{
     FractalRequest, FractalResponse, WebSocketCommand, WebSocketRequest, WebSocketResponse,
@@ -280,7 +280,7 @@ async fn post_single_java() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("image data written to canvas");
-    set_info_text(fractal_response, "Java-single-threaded");
+    set_info_text(fractal_response, "java-single-threaded");
     Ok(())
 }
 
@@ -313,6 +313,35 @@ async fn post_multi_java() -> Result<(), reqwasm::Error> {
     Ok(())
 }
 
+async fn post_multi_java_virtual() -> Result<(), reqwasm::Error> {
+    console_log!("post_multi_java_virtual!");
+
+    let (context, canvas) = get_canvas_context();
+    clear_canvas(&canvas);
+
+    let fractal_request = dummy_request();
+    let fractal_request = serde_json::json!(fractal_request).to_string();
+    let url = format!("{}{}", JAVA_SERVER, API_URL_MULTI_THREADED);
+
+    let re = Request::post(&url)
+        .body(fractal_request)
+        .header("content-type", "application/json")
+        .send()
+        .await?
+        .text()
+        .await;
+
+    let response = re.expect("should be a valid Response/Body !!!");
+    let fractal_response: serde_json::error::Result<FractalResponse> =
+        serde_json::from_str(&response);
+
+    let fractal_response = fractal_response.unwrap();
+    draw_to_canvas(&fractal_response, &context, &canvas);
+    console_log!("image data written to canvas");
+    set_info_text(fractal_response, "java-multi-threaded-virtual");
+    Ok(())
+}
+
 async fn post_crossbeam_tiled() {
     console_log!("post_crossbeam_tiled!");
 
@@ -329,7 +358,7 @@ async fn post_crossbeam_tiled() {
     // let socket_clone = socket.clone();
     let fractal_request = dummy_request();
     let width = fractal_request.width;
-    let  height = 0;
+    let height = 0;
     let mut cnt_tiles = 0;
 
     let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
@@ -402,8 +431,8 @@ async fn post_crossbeam_tiled() {
 }
 
 fn dummy_request() -> FractalRequest {
-    let (  request, _, _) = tree(true);
- 
+    let (request, _, _) = basic(true);
+
     request
 }
 
@@ -537,6 +566,23 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
         });
     };
 
+    let start_java_multi_virtual = move |e: MouseEvent| {
+        console_log!("start_java_multi_virtual  clicked.  event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_multi_java_virtual().await;
+                match res {
+                    Ok(_) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/rayon target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
     view! { cx,
 
         div(class = "row", style ="margin-bottom: 10px;") {
@@ -604,7 +650,7 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
             }
         }
 
-          div(class = "row", style ="margin-bottom: 10px;") {
+        div(class = "row", style ="margin-bottom: 10px;") {
             div (class="col-12") {
                  button(class="btn btn-primary", type="button", id="java_multithreaded" ,on:click=start_java_multi){
                             "Java multi threaded"
@@ -612,6 +658,19 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
                 br {
                 }
                 p(id = "java-multi-threaded") {
+                    "Duration:"
+                }
+            }
+        }
+
+        div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                 button(class="btn btn-primary", type="button", id="java_multithreaded_virtual" ,on:click=start_java_multi_virtual){
+                            "Java multi threaded virtual"
+                }
+                br {
+                }
+                p(id = "java-multi-threaded-virtual") {
                     "Duration:"
                 }
             }
