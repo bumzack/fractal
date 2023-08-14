@@ -170,7 +170,7 @@ pub fn calc_multi_threaded(
     for _ in 0..cores {
         let colors: Vec<Color> = match colors {
             16 => palette.get("wild.map").unwrap().clone(),
-            256 => palette.get("neon.map").unwrap().clone(),
+            256 => palette.get("basic.map").unwrap().clone(),
             _ => panic!("number of colors not supported {}", colors),
         };
 
