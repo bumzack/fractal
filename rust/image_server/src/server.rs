@@ -60,7 +60,7 @@ pub async fn get_images() -> utils::Result<impl Reply> {
 
     let mut images = vec![];
 
-    let server = "http://localhost:3100";
+    let server = "http://api.bumzack.at";
     let mut id = 1;
     for path in paths {
         let buf = path.path();
