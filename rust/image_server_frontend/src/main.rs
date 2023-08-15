@@ -23,8 +23,6 @@ const API_URL_IMAGES: &str = "/api/images";
 async fn read_images() -> Result<Images, reqwasm::Error> {
     console_log!("read_images!");
 
-    // let fractal_request = dummy_request();
-    // let fractal_request = serde_json::json!(fractal_request).to_string();
     let url = format!("{}{}", SERVER, API_URL_IMAGES);
 
     let re = Request::get(&url).send().await?.text().await;
@@ -40,41 +38,32 @@ async fn read_images() -> Result<Images, reqwasm::Error> {
 
 #[component]
 async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
-    let count = create_signal(cx, vec![1, 2]);
-
     let images = read_images().await.expect("should load images");
     let img = create_signal(cx, images.images);
 
-    // images
-    //     .images
-    //     .iter()
-    //     .for_each(|i| console_log!("image url {}: ", i.url));
-
     view! { cx,
+        div(class="album py-5 bg-body-tertiary") {
+             div(class="container") {
+                div (class = "row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3") {
+                        Keyed (
+                            iterable=  img,
+                            view=|cx, x| view! { cx,
+                              div (class = "col") {
+                                div(class="card shadow-sm") {
+                                    img (class="card-img-top", src=(x.url)) {
 
-         div(class="container") {
-            div (class = "row") {
-                div (class = "col-lg-12") {
-                    Keyed (
-                        iterable=  img,
-                        view=|cx, x| view! { cx,
-                            div(class="card mb-12 box-shadow") {
-                                img (class="card-img-top", src=(x.url)) {
-
-                                }
-                                 div (class="card-body") {
-                                    p(class="card-text") {
-                                        (x.prompt)
+                                    }
+                                     div (class="card-body") {
+                                        p(class="card-text") {
+                                            (x.prompt)
+                                        }
                                     }
                                 }
-                            }
-                            br{}
-                            br{}
-                            br{}
-                        },
-                        key=|x| x.id,
-                    )
-                }
+                                }
+                            },
+                            key=|x| x.id,
+                        )
+                    }
             }
         }
     }
@@ -105,19 +94,13 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
     // }
 
     view! { cx,
-
         div(class = "row", style ="margin-bottom: 10px;") {
             div (class="col-12") {
 
                 br {
                 }
-                p(id = "rust-single-threaded") {
-                    "Duration:"
-                }
             }
         }
-
-
     }
 }
 
@@ -127,7 +110,7 @@ async fn Header<G: Html>(cx: Scope<'_>) -> View<G> {
         header(class = "py-3 mb-3 border-bottom") {
             div(class = "container-fluid d-grid gap-3 align-items-center", style ="rid-template-columns: 1fr 2fr;") {
                 span(class="navbar-brand mb-0 h1") {
-                    "FractalThingi"
+                    "Dolphin Thingi"
                 }
             }
         }
@@ -141,18 +124,7 @@ async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
     };
 
     let app_state = create_signal(cx, app_state);
-
-    // create_effect(cx, || {
-    //     println!("State changed. New state value = {:?}", app_state.get());
-    // });
-
     provide_context_ref(cx, app_state);
-
-    // let server_stats_vec = create_memo(cx, || {
-    //
-    //     println!("hi from create_memo server_stats_vec");
-    // });
-
     view! { cx,
         main {
             Header

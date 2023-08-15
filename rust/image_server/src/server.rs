@@ -22,14 +22,33 @@ pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection>
 
     // let server_source = warp::path!("static");
     let image =
-        warp::path("static")
+        warp::path("images")
             .and(warp::fs::dir(path))
             .map(|reply: warp::filters::fs::File| {
                 info!("GET  api/image   filename   {:?}", reply.path().as_os_str());
                 reply.into_response()
             });
 
-    images.or(image)
+    let path = format!(
+        "{}/../image_server_frontend/dist",
+        env!("CARGO_MANIFEST_DIR")
+    );
+    // let path = "/images";
+    info!("path  {}", path);
+    let frontend =
+        warp::path("static")
+            .and(warp::fs::dir(path))
+            .map(|reply: warp::filters::fs::File| {
+                info!("GET  / frontend   filename  {:?}", reply.path().as_os_str());
+                if reply.path().ends_with(".js") {
+                    warp::reply::with_header(reply, "Content-Type", "text/javascript")
+                        .into_response()
+                } else {
+                    reply.into_response()
+                }
+            });
+
+    images.or(image).or(frontend)
 }
 
 pub async fn get_images() -> utils::Result<impl Reply> {
@@ -48,7 +67,7 @@ pub async fn get_images() -> utils::Result<impl Reply> {
         if p.contains(".png") {
             let systime = entry.metadata().unwrap().created().unwrap();
             let datetime: DateTime<Utc> = systime.into();
-            let url = format!("{}/static/{}", server, filename);
+            let url = format!("{}/images/{}", server, filename);
             let image = Image {
                 filename: filename.to_string(),
                 prompt: filename.to_string(),
