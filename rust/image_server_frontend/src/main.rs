@@ -1,8 +1,6 @@
 use reqwasm::http::Request;
-use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
 use wasm_bindgen::prelude::*;
-use web_sys::MouseEvent;
 
 use common::imageserver::models::imageservermodels::Images;
 

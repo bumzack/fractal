@@ -1,5 +1,5 @@
 use std::cmp::Reverse;
-use std::fs::read_dir;
+use std::fs::{read_dir, DirEntry};
 
 use chrono::{DateTime, Utc};
 use log::info;
@@ -56,7 +56,7 @@ pub async fn get_images() -> utils::Result<impl Reply> {
     let path = format!("{}/images", env!("CARGO_MANIFEST_DIR"));
     let mut paths: Vec<_> = read_dir(path).unwrap().map(|r| r.unwrap()).collect();
 
-    paths.sort_by_key(|dir| Reverse(dir.metadata().unwrap().created().unwrap()));
+    paths.sort_by_key(|dir| Reverse(convert_created_to_u64(dir)));
 
     let mut images = vec![];
 
@@ -67,6 +67,7 @@ pub async fn get_images() -> utils::Result<impl Reply> {
         let filename = buf.file_name().unwrap().to_str().unwrap();
         let p = buf.display().to_string();
         println!("Name: {}", &p);
+
         if p.contains(".png") {
             let systime = path.metadata().unwrap().created().unwrap();
             let datetime: DateTime<Utc> = systime.into();
@@ -77,6 +78,7 @@ pub async fn get_images() -> utils::Result<impl Reply> {
                 created_at: datetime.to_rfc3339(),
                 url,
                 id,
+                timestamp: convert_from_filename(filename),
             };
             id += 1;
             images.push(image);
@@ -87,4 +89,36 @@ pub async fn get_images() -> utils::Result<impl Reply> {
     let res = json(&images);
 
     Ok(res)
+}
+
+fn convert_created_to_u64(dir: &DirEntry) -> u64 {
+    let string = dir.file_name();
+    let filename = string.to_str().unwrap();
+
+    convert_from_filename(filename)
+}
+
+fn convert_from_filename(filename: &str) -> u64 {
+    let idx = filename.find("_1");
+
+    let timestamp = match idx {
+        None => 0,
+        Some(idx) => {
+            let (_, timestamp) = filename.split_at(idx + 1);
+            let idx = timestamp.find(".png").unwrap();
+            let (timestamp, _) = timestamp.split_at(idx);
+            let idx = timestamp.find(".").unwrap();
+            let (timestamp, _) = timestamp.split_at(idx);
+            let num: u64 = timestamp.parse().unwrap();
+            println!(
+                "Filename: {}    --->   timestamp string '{}'   timestamp as f64 {}",
+                &filename, &timestamp, num
+            );
+            num
+        }
+    };
+
+    println!("Filename: {}    --->   timestamp {}", &filename, &timestamp);
+
+    timestamp
 }

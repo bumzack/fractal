@@ -7,6 +7,7 @@ pub mod imageservermodels {
         pub prompt: String,
         pub created_at: String,
         pub url: String,
+        pub timestamp: u64,
         pub id: u32,
     }
 
