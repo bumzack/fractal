@@ -1,3 +1,4 @@
+use std::cmp::Reverse;
 use std::fs::read_dir;
 
 use chrono::{DateTime, Utc};
@@ -53,19 +54,21 @@ pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection>
 
 pub async fn get_images() -> utils::Result<impl Reply> {
     let path = format!("{}/images", env!("CARGO_MANIFEST_DIR"));
-    let paths = read_dir(path).unwrap();
+    let mut paths: Vec<_> = read_dir(path).unwrap().map(|r| r.unwrap()).collect();
+
+    paths.sort_by_key(|dir| Reverse(dir.metadata().unwrap().created().unwrap()));
+
     let mut images = vec![];
 
     let server = "http://localhost:3100";
     let mut id = 1;
     for path in paths {
-        let entry = path.unwrap();
-        let buf = entry.path();
+        let buf = path.path();
         let filename = buf.file_name().unwrap().to_str().unwrap();
         let p = buf.display().to_string();
         println!("Name: {}", &p);
         if p.contains(".png") {
-            let systime = entry.metadata().unwrap().created().unwrap();
+            let systime = path.metadata().unwrap().created().unwrap();
             let datetime: DateTime<Utc> = systime.into();
             let url = format!("{}/images/{}", server, filename);
             let image = Image {
