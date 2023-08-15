@@ -50,7 +50,7 @@ pub fn flower(debug: bool) -> (FractalRequest, f64, f64) {
 
     let mut zoom = 1.0;
     let mut max_iterations: u32 = 50_000;
-    let mut zoom_factor = 1.1;
+    let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
     let mut width: u32 = 4096;
@@ -94,7 +94,7 @@ pub fn tendrils(debug: bool) -> (FractalRequest, f64, f64) {
 
     let mut zoom = 1.0;
     let mut max_iterations: u32 = 50_000;
-    let mut zoom_factor = 1.1;
+    let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
     let mut width: u32 = 4096;
@@ -139,7 +139,7 @@ pub fn julia_island(debug: bool) -> (FractalRequest, f64, f64) {
 
     let mut zoom = 1.0;
     let mut max_iterations: u32 = 50_000;
-    let mut zoom_factor = 1.1;
+    let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
     let mut width: u32 = 4096;
@@ -181,7 +181,7 @@ pub fn seahorse_valley(debug: bool) -> (FractalRequest, f64, f64) {
 
     let mut zoom = 1.0;
     let mut max_iterations: u32 = 50_000;
-    let mut zoom_factor = 1.1;
+    let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
     let mut width: u32 = 4096;
@@ -224,7 +224,7 @@ pub fn starfish(debug: bool) -> (FractalRequest, f64, f64) {
 
     let mut zoom = 1.0;
     let mut max_iterations: u32 = 50_000;
-    let mut zoom_factor = 1.1;
+    let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
     let mut width: u32 = 4096;
@@ -268,7 +268,7 @@ pub fn sun(debug: bool) -> (FractalRequest, f64, f64) {
 
     let mut zoom = 1.0;
     let mut max_iterations: u32 = 50_000;
-    let mut zoom_factor = 1.1;
+    let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
     let mut width: u32 = 4096;
@@ -314,7 +314,7 @@ pub fn tree(debug: bool) -> (FractalRequest, f64, f64) {
 
     let mut zoom = 1.0;
     let mut max_iterations: u32 = 50_000;
-    let mut zoom_factor = 1.1;
+    let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
     if debug {

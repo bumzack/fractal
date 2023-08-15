@@ -17,7 +17,7 @@ extern "C" {
     pub fn log(s: &str);
 }
 
-const SERVER: &str = "http://localhost:3100";
+const SERVER: &str = "http://api.bumzack.at";
 const API_URL_IMAGES: &str = "/api/images";
 
 async fn read_images() -> Result<Images, reqwasm::Error> {
