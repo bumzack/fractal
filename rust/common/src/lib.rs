@@ -10,3 +10,5 @@ pub mod utils;
 pub mod fractal_calculation;
 pub mod fractal_templates;
 pub mod palette;
+
+pub mod imageserver;

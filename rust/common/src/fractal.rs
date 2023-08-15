@@ -1,7 +1,6 @@
-use crate::color::{Color, BLACK};
+use crate::color::{BLACK, Color};
 use crate::complex::ComplexNumber;
 
- 
 pub fn calc_fractal_color(
     x: u32,
     y: u32,

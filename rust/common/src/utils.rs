@@ -1,9 +1,11 @@
-use crate::color::Color;
-use crate::complex::ComplexNumber;
+use std::{fs, time::Instant};
+
 use chrono::Utc;
 use image::{ImageBuffer, RgbImage};
 use log::{error, info};
-use std::{fs, time::Instant};
+
+use crate::color::Color;
+use crate::complex::ComplexNumber;
 
 pub fn save_png(pixels: &[Color], width: u32, height: u32) {
     let start = Instant::now();

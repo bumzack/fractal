@@ -1,15 +1,15 @@
 use std::time::Instant;
 
-use common::complex::ComplexNumber;
 use crossbeam_channel::unbounded;
 use futures_util::{SinkExt, StreamExt, TryFutureExt};
 use log::{error, info};
 use serde_json::json;
+use warp::{Filter, Reply};
 use warp::reply::json;
 use warp::ws::{Message, WebSocket};
-use warp::{Filter, Reply};
 
 use common::color::Color;
+use common::complex::ComplexNumber;
 use common::fractal_calculation::{
     calc_multi_threaded, calc_multi_threaded_crossbeam_tiles, calc_rayon, calc_single_threaded,
 };
@@ -22,7 +22,7 @@ use common::utils::save_png2;
 
 use crate::utils;
 
-pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection> + Clone {
+pub fn routes() -> impl Filter<Extract=(impl Reply, ), Error=warp::Rejection> + Clone {
     let server_source = warp::path!("api" / "singlethreaded");
     let single_threaded = server_source
         .and(warp::post())
@@ -127,7 +127,7 @@ pub async fn handle_request_rayon(req: FractalRequest) -> utils::Result<impl Rep
     );
 
     let response = FractalResponse {
-        duration_calculation: format!("calculation  rayon threaded took {:0.2} ms", duration,),
+        duration_calculation: format!("calculation  rayon threaded took {:0.2} ms", duration, ),
         fractal,
         duration_ms: duration,
     };

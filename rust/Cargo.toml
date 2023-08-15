@@ -3,6 +3,8 @@
 members = [
     "backend",
     "frontend",
-    "common"
+    "common",
+    "image_server",
+    "image_server_frontend"
 ]
 
