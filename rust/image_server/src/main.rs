@@ -1,7 +1,8 @@
-use crate::server::routes;
 use log::{info, LevelFilter};
 use pretty_env_logger::env_logger::{Builder, Target};
 use warp::Filter;
+
+use crate::server::routes;
 
 mod server;
 mod utils;

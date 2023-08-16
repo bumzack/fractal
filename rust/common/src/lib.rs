@@ -12,3 +12,4 @@ pub mod fractal_templates;
 pub mod palette;
 
 pub mod imageserver;
+pub mod rational;

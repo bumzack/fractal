@@ -4,9 +4,9 @@ use crossbeam_channel::unbounded;
 use futures_util::{SinkExt, StreamExt, TryFutureExt};
 use log::{error, info};
 use serde_json::json;
-use warp::{Filter, Reply};
 use warp::reply::json;
 use warp::ws::{Message, WebSocket};
+use warp::{Filter, Reply};
 
 use common::color::Color;
 use common::complex::ComplexNumber;
@@ -18,11 +18,13 @@ use common::image_tile::TileData;
 use common::models::{
     FractalRequest, FractalResponse, WebSocketCommand, WebSocketRequest, WebSocketResponse,
 };
+use common::rational::rational_fractal_calculation::calc_multi_threaded_rational;
+use common::rational::request::FractalRequestRational;
 use common::utils::save_png2;
 
 use crate::utils;
 
-pub fn routes() -> impl Filter<Extract=(impl Reply, ), Error=warp::Rejection> + Clone {
+pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection> + Clone {
     let server_source = warp::path!("api" / "singlethreaded");
     let single_threaded = server_source
         .and(warp::post())
@@ -56,10 +58,20 @@ pub fn routes() -> impl Filter<Extract=(impl Reply, ), Error=warp::Rejection> + 
         ws.on_upgrade(move |socket| handle_request_crossbeam_tiles(socket))
     });
 
+    let server_source = warp::path!("api" / "multithreaded" / "rational");
+    let multi_threaded_rational = server_source
+        .and(warp::post())
+        .and(warp::body::json())
+        .and_then(|req: FractalRequestRational| {
+            info!("POST api/multithreaded/rational   req {:?}", &req);
+            handle_request_multi_threaded_rational(req)
+        });
+
     single_threaded
         .or(multi_threaded)
         .or(multi_threaded_rayon)
         .or(multi_threaded_crossbeam_tiles)
+        .or(multi_threaded_rational)
 }
 
 pub async fn handle_request_single_threaded(req: FractalRequest) -> utils::Result<impl Reply> {
@@ -114,6 +126,38 @@ pub async fn handle_request_multi_threaded(req: FractalRequest) -> utils::Result
     Ok(res)
 }
 
+pub async fn handle_request_multi_threaded_rational(
+    req: FractalRequestRational,
+) -> utils::Result<impl Reply> {
+    info!("got a request   {:?}", &req);
+    let (fractal, duration, cores) = calc_multi_threaded_rational(
+        &req.center,
+        req.complex_width,
+        req.zoom,
+        req.width,
+        req.height,
+        req.max_iterations,
+        req.colors,
+        req.name,
+    );
+
+    let response = FractalResponse {
+        duration_calculation: format!(
+            "calculation  handle_request_multi_threaded_rational using plain threads  took {:0.2} ms using {} cores",
+            duration, cores
+        ),
+        fractal,
+        duration_ms: duration,
+    };
+    let res = json(&response);
+
+    info!(
+        "calculation handle_request_multi_threaded_rational  using plain threads  took {:0.2} ms",
+        duration
+    );
+    Ok(res)
+}
+
 pub async fn handle_request_rayon(req: FractalRequest) -> utils::Result<impl Reply> {
     let (fractal, duration) = calc_rayon(
         &req.center,
@@ -127,7 +171,7 @@ pub async fn handle_request_rayon(req: FractalRequest) -> utils::Result<impl Rep
     );
 
     let response = FractalResponse {
-        duration_calculation: format!("calculation  rayon threaded took {:0.2} ms", duration, ),
+        duration_calculation: format!("calculation  rayon threaded took {:0.2} ms", duration,),
         fractal,
         duration_ms: duration,
     };

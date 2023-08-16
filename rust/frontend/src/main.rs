@@ -12,6 +12,9 @@ use common::image_tile::TileData;
 use common::models::{
     FractalRequest, FractalResponse, WebSocketCommand, WebSocketRequest, WebSocketResponse,
 };
+use common::rational::complex_rational_numbers::ComplexRationalNumber;
+use common::rational::rational_numbers::RationalNumber;
+use common::rational::request::FractalRequestRational;
 
 #[macro_export]
 macro_rules! console_log {
@@ -163,6 +166,8 @@ pub fn set_info_text(fractal_response: FractalResponse, id: &str) {
 const SERVER: &str = "http://localhost:3000";
 const API_URL_SINGLE_THREADED: &str = "/api/singlethreaded";
 const API_URL_MULTI_THREADED: &str = "/api/multithreaded";
+const API_URL_MULTI_THREADED_RATIONAL: &str = "/api/multithreaded/rational";
+
 const API_URL_RAYON: &str = "/api/rayon";
 
 const JAVA_SERVER: &str = "http://localhost:4000";
@@ -207,6 +212,37 @@ async fn post_multi_threaded() -> Result<(), reqwasm::Error> {
     console_log!("post_multi_threaded!    {}", fractal_request);
 
     let url = format!("{}{}", SERVER, API_URL_MULTI_THREADED);
+
+    let re = Request::post(&url)
+        .body(fractal_request)
+        .header("content-type", "application/json")
+        .send()
+        .await?
+        .text()
+        .await;
+
+    let response = re.expect("should be a valid Response/Body !!!");
+    let fractal_response: serde_json::error::Result<FractalResponse> =
+        serde_json::from_str(&response);
+
+    let fractal_response = fractal_response.unwrap();
+    draw_to_canvas(&fractal_response, &context, &canvas);
+    console_log!("updated data");
+
+    set_info_text(fractal_response, "rust-multi-threaded");
+    Ok(())
+}
+
+async fn post_multi_threaded_rational() -> Result<(), reqwasm::Error> {
+    console_log!("post_multi_threaded!");
+    let (context, canvas) = get_canvas_context();
+    clear_canvas(&canvas);
+
+    let fractal_request = dummy_request_rational();
+    let fractal_request = serde_json::json!(fractal_request).to_string();
+    console_log!("post_multi_threaded!    {}", fractal_request);
+
+    let url = format!("{}{}", SERVER, API_URL_MULTI_THREADED_RATIONAL);
 
     let re = Request::post(&url)
         .body(fractal_request)
@@ -439,6 +475,37 @@ fn dummy_request() -> FractalRequest {
     request
 }
 
+fn dummy_request_rational() -> FractalRequestRational {
+    let center = ComplexRationalNumber {
+        a: RationalNumber { num: -8, denom: 10 },
+        b: RationalNumber { num: 0, denom: 1 },
+    };
+
+    let zoom = RationalNumber { num: 1, denom: 1 };
+
+    let max_iterations: u32 = 1_000;
+
+    let width: u32 = 10;
+    let height: u32 = 10;
+
+    let complex_width = RationalNumber { num: 31, denom: 10 };
+
+    let colors = 256;
+
+    FractalRequestRational {
+        center,
+        width,
+        height,
+        complex_width,
+        max_iterations,
+        colors,
+        x_tiles: 0,
+        y_tiles: 0,
+        zoom,
+        name: "basis_rational".to_string(),
+    }
+}
+
 #[component]
 async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
     view! { cx,
@@ -520,6 +587,27 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
                     }
                     Err(e) => {
                         console_log!("error calling server /api/rayon target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    let start_rust_rational = move |e: MouseEvent| {
+        e.prevent_default();
+        console_log!("start_rust_rational  clicked.   event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_multi_threaded_rational().await;
+                match res {
+                    Ok(_) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!(
+                            "error calling server /api/multithreaded/rational target.  {:?}",
+                            e
+                        )
                     }
                 }
             }
@@ -627,7 +715,7 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
             }
         }
 
-          div(class = "row", style ="margin-bottom: 10px;") {
+        div(class = "row", style ="margin-bottom: 10px;") {
             div (class="col-12") {
                 button(class="btn btn-primary", type="button", id="rayon" ,on:click=start_rayon){
                     "Rayon"
@@ -639,6 +727,20 @@ async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
                 }
             }
         }
+
+        div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="rust-rational-btn" ,on:click=start_rust_rational){
+                    "Rust rational numbers"
+                }
+                br {
+                }
+                p(id = "rust-rational") {
+                    "Duration:"
+                }
+            }
+        }
+
 
           div(class = "row", style ="margin-bottom: 10px;") {
             div (class="col-12") {
