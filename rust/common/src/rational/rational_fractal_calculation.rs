@@ -65,10 +65,10 @@ pub fn calc_multi_threaded_rational(
     let x_delta = &(&re_max - &re_min) / &w;
     let y_delta = &(&img_max - &img_min) / &h;
 
-    info!("re_min {re_min}, re_max {re_max},  img_min {img_min}   img_max {img_max}  x_delta {x_delta}  y_delta  {y_delta} ");
+    // info!("re_min {re_min}, re_max {re_max},  img_min {img_min}   img_max {img_max}  x_delta {x_delta}  y_delta  {y_delta} ");
 
-    info!("x_delta {},   y_delta {}   width {}  height {},  max_iterations {},  re_min {}, re_max {}, img_min {}, img_max {}" ,
-        x_delta, y_delta, width,  height, max_iterations, re_min, re_max, img_min, img_max);
+    // info!("x_delta {},   y_delta {}   width {}  height {},  max_iterations {},  re_min {}, re_max {}, img_min {}, img_max {}" ,
+    //     x_delta, y_delta, width,  height, max_iterations, re_min, re_max, img_min, img_max);
 
     let pixels = vec![Color::default(); width as usize * height as usize];
 
@@ -93,9 +93,7 @@ pub fn calc_multi_threaded_rational(
         let y_global = Arc::clone(&y_global);
 
         let re_min = re_min.clone();
-        // let re_max = re_max.clone();
         let img_min = img_min.clone();
-        // let img_max = img_max.clone();
         let x_delta = x_delta.clone();
         let y_delta = y_delta.clone();
 
@@ -128,6 +126,7 @@ pub fn calc_multi_threaded_rational(
                             max_iterations,
                             &colors,
                         );
+                        println!("x {}, y {}, color {}", x, y_thread, &p);
                         pixels_thread[x as usize].r = p.r;
                         pixels_thread[x as usize].g = p.g;
                         pixels_thread[x as usize].b = p.b;
@@ -175,6 +174,8 @@ pub fn calc_multi_threaded_rational(
     let duration = start.elapsed().as_millis();
     let mutex = Arc::try_unwrap(pixels).unwrap();
     let pixelssss = mutex.into_inner().unwrap();
+
+    pixelssss.iter().for_each(|c| println!("color   {}", c));
 
     let tl = ComplexRationalNumber {
         a: re_min.clone(),
@@ -289,19 +290,25 @@ pub fn calc_fractal_color_rational(
         denom: 1,
     };
     let c = ComplexRationalNumber {
-        a: re_min + x_delta * x,
-        b: img_min + y_delta * y,
+        a: re_min + &x_delta * &x,
+        b: img_min + &y_delta * &y,
     };
 
-    println!("c = {}", c);
+    println!("x = {}, y = {}, c = {}", x, y, c);
 
     let mut z = ComplexRationalNumber::default();
     let radius_4 = RationalNumber { num: 4, denom: 1 };
 
-    println!("initial z = {}", z);
+    // println!("initial z = {}", z);
+    // println!("z.length_squared()   {}", z.length_squared());
+    // println!(
+    //     "cnt_iterations)   {}    max_iterations  {}",
+    //     cnt_iterations, max_iterations
+    // );
+
     while z.length_squared() < radius_4 && cnt_iterations < max_iterations {
         z = z.pow2() + &c;
-        println!("z_new = {}", z);
+        // println!("z_new = {}", z);
 
         cnt_iterations += 1;
     }
@@ -311,10 +318,10 @@ pub fn calc_fractal_color_rational(
     );
 
     if cnt_iterations >= max_iterations {
-        info!(
-            "BLACK       z = {}, c = {} ,  cnt_iterations {}, max_iterations {}",
-            &z, &c, cnt_iterations, max_iterations
-        );
+        // info!(
+        //     "BLACK       z = {}, c = {} ,  cnt_iterations {}, max_iterations {}",
+        //     &z, &c, cnt_iterations, max_iterations
+        // );
         BLACK
     } else {
         let idx = cnt_iterations as usize % colors.len();
@@ -337,17 +344,38 @@ mod tests {
 
     #[test]
     fn test_calc() {
-        let x = 200;
-        let y = 200;
-        let re_min = RationalNumber { num: 12, denom: 10 };
-        let img_min = RationalNumber { num: 12, denom: 10 };
-        let x_delta = RationalNumber { num: 12, denom: 10 };
-        let y_delta = RationalNumber { num: 12, denom: 10 };
+        // let x = 410;
+        // let y = 331;
+        // let re_min = -3.0142857142857142;
+        // let img_min = -1.6607142857142858;
+        // let x_delta = 0.005535714285714286;
+        // let y_delta = 0.005535714285714286;
 
-        let max_iterations = 100;
+        let x = 410;
+        let y = 331;
+        // 005535714285714286
+        // 100000000000000000
+        let re_min = RationalNumber {
+            num: -30142857142857142,
+            denom: 10000000000000000,
+        };
+        let img_min = RationalNumber {
+            num: -16607142857142858,
+            denom: 10000000000000000,
+        };
+        let x_delta = RationalNumber {
+            num: 005535714285714286,
+            denom: 100000000000000000,
+        };
+        let y_delta = RationalNumber {
+            num: 005535714285714286,
+            denom: 100000000000000000,
+        };
+
+        let max_iterations = 1_000;
 
         let palette = read_palette();
-        let colors: &Vec<Color> = palette.get("wild.map").unwrap();
+        let colors: &Vec<Color> = palette.get("basic.map").unwrap();
 
         let c = calc_fractal_color_rational(
             x,
@@ -361,21 +389,27 @@ mod tests {
         );
 
         println!("calculated color {}", c);
+
+        assert_eq!(c.r, 60);
+        assert_eq!(c.g, 180);
+        assert_eq!(c.b, 180);
     }
 
     #[test]
     fn test_calc_f64() {
-        let x = 200;
-        let y = 200;
-        let re_min = 1.2;
-        let img_min = 1.2;
-        let x_delta = 1.2;
-        let y_delta = 1.2;
+        let x = 410;
+        let y = 331;
+        let re_min = -3.0142857142857142;
+        let img_min = -1.6607142857142858;
+        let x_delta = 0.005535714285714286;
+        let y_delta = 0.005535714285714286;
 
-        let max_iterations = 100;
+        // x 410, y 331  color color = ( 60 / 180 / 180 )   re_min -3.0142857142857142, img_min -1.6607142857142858, x_delta  0.005535714285714286 y_delta 0.005535714285714286
+        // x 410, y 331  color color = ( 60 / 180 / 180 )   re_min -3.0142857142857142, img_min -1.6607142857142858, x_delta  0.005535714285714286 y_delta 0.005535714285714286     color color = ( 60 / 180 / 180 )
+        let max_iterations = 1_000;
 
         let palette = read_palette();
-        let colors: &Vec<Color> = palette.get("wild.map").unwrap();
+        let colors: &Vec<Color> = palette.get("basic.map").unwrap();
 
         let c = calc_fractal_color(
             x,
@@ -387,7 +421,10 @@ mod tests {
             max_iterations,
             colors,
         );
-
         println!("calculated color {}", c);
+
+        assert_eq!(c.r, 60);
+        assert_eq!(c.g, 180);
+        assert_eq!(c.b, 180);
     }
 }

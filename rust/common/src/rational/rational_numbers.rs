@@ -22,9 +22,9 @@ impl PartialEq<Self> for RationalNumber {
 
         // let res = (a == x) && (b == y);
         // println!(
-        //        "a = {}, b = {}    x = {}, y = {}      ( a == x) && (b == y)  {}",
-        //        a, b, x, y, res
-        //    );
+        //     "a = {}, b = {}    x = {}, y = {}      ( a == x) && (b == y)  {}",
+        //     a, b, x, y, res
+        // );
         (a == x) && (b == y)
     }
 }
@@ -39,12 +39,12 @@ impl PartialOrd<Self> for RationalNumber {
         let x = other.num / divisor;
         let y = other.denom / divisor;
 
-        let ordering = (x.pow(2) + y.pow(2)).cmp(&(a.pow(2) + b.pow(2)));
+        let ordering = (a.pow(2) + b.pow(2)).cmp(&(x.pow(2) + y.pow(2)));
 
         // println!(
-        //        "a = {}, b = {}    x = {}, y = {}      ordering  {:?}",
-        //        a, b, x, y, ordering
-        //    );
+        //     "a = {}, b = {}    x = {}, y = {}      ordering  {:?}",
+        //     a, b, x, y, ordering
+        // );
 
         Some(ordering)
     }
@@ -54,6 +54,10 @@ impl Add for RationalNumber {
     type Output = RationalNumber;
 
     fn add(self, rhs: Self) -> Self::Output {
+        println!(
+            "self.num {}, rhs.denom {}  self.denom {}, rhs.num  {}",
+            self.num, rhs.denom, self.denom, rhs.num
+        );
         let num = self.num * rhs.denom + self.denom * rhs.num;
         let denom = self.denom * rhs.denom;
         let divisor = gcd(num, denom);
@@ -528,6 +532,56 @@ mod tests {
         let expected = false;
         let actual = a <= b;
 
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_ord_06() {
+        let a = RationalNumber { num: 1, denom: 1 };
+        let b = RationalNumber { num: 2, denom: 1 };
+
+        let expected = false;
+        let actual = a == b;
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_ord_07() {
+        let a = RationalNumber { num: 1, denom: 1 };
+        let b = RationalNumber { num: 2, denom: 1 };
+
+        let expected = true;
+        let actual = a < b;
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_ord_08() {
+        let a = RationalNumber { num: 1, denom: 1 };
+        let b = RationalNumber { num: 2, denom: 1 };
+
+        let expected = true;
+        let actual = a <= b;
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_ord_09() {
+        let a = RationalNumber { num: 1, denom: 1 };
+        let b = RationalNumber { num: 2, denom: 1 };
+
+        let expected = false;
+        let actual = a > b;
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_ord_10() {
+        let a = RationalNumber { num: 1, denom: 1 };
+        let b = RationalNumber { num: 2, denom: 1 };
+
+        let expected = false;
+        let actual = a >= b;
         assert_eq!(actual, expected);
     }
 }

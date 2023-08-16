@@ -485,8 +485,8 @@ fn dummy_request_rational() -> FractalRequestRational {
 
     let max_iterations: u32 = 1_000;
 
-    let width: u32 = 10;
-    let height: u32 = 10;
+    let width: u32 = 1200;
+    let height: u32 = 800;
 
     let complex_width = RationalNumber { num: 31, denom: 10 };
 

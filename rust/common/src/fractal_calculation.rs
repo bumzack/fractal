@@ -7,11 +7,11 @@ use log::{error, info};
 use rayon::prelude::IntoParallelRefMutIterator;
 use rayon::prelude::ParallelIterator;
 
-use crate::color::{Color, color16, color256};
+use crate::color::{color16, color256, Color};
 use crate::complex::ComplexNumber;
 use crate::fractal::calc_fractal_color;
 use crate::fractal_image::FractalImage;
-use crate::image_tile::{TileData, TileDataPoint, tiles};
+use crate::image_tile::{tiles, TileData, TileDataPoint};
 use crate::palette::read_palette;
 use crate::rayon_image::Pixel;
 use crate::utils::save_png2;
@@ -210,6 +210,15 @@ pub fn calc_multi_threaded(
                         pixels_thread[x as usize].r = p.r;
                         pixels_thread[x as usize].g = p.g;
                         pixels_thread[x as usize].b = p.b;
+
+                        // if p.r != 0 && p.g != 0 && p.b != 0 {
+                        //     println!("x {}, y {}  color {}   re_min {}, img_min {}, x_delta  {} y_delta {}",
+                        //              x, y_thread, p, re_min, img_min, x_delta, y_delta);
+                        // }
+                        if x == 410 && y_thread == 331 {
+                            println!("x {}, y {}  color {}   re_min {}, img_min {}, x_delta  {} y_delta {}     color {}",
+                                     x, y_thread, p, re_min, img_min, x_delta, y_delta, p);
+                        }
                     }
 
                     {
