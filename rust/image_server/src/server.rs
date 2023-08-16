@@ -1,7 +1,7 @@
 use std::cmp::Reverse;
 use std::fs::{read_dir, DirEntry};
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use log::info;
 use warp::reply::json;
 use warp::{Filter, Reply};
@@ -66,16 +66,22 @@ pub async fn get_images() -> utils::Result<impl Reply> {
         let buf = path.path();
         let filename = buf.file_name().unwrap().to_str().unwrap();
         let p = buf.display().to_string();
-        println!("Name: {}", &p);
+
+        let ts = convert_from_filename(filename) as i64;
+        let naive = NaiveDateTime::from_timestamp_opt(ts, 0).expect("should be a date");
+        let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
+
+        // Format the datetime how you want
+        let newdate = datetime.format("%H:%M:%S,%d.%m.%Y").to_string();
+
+        println!("Name: {}       newdate {}", &p, &newdate);
 
         if p.contains(".png") {
-            let systime = path.metadata().unwrap().created().unwrap();
-            let datetime: DateTime<Utc> = systime.into();
             let url = format!("{}/images/{}", server, filename);
             let image = Image {
                 filename: filename.to_string(),
                 prompt: filename.to_string(),
-                created_at: datetime.to_rfc3339(),
+                created_at: newdate,
                 url,
                 id,
                 timestamp: convert_from_filename(filename),
