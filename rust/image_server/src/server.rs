@@ -60,7 +60,7 @@ pub async fn get_images() -> utils::Result<impl Reply> {
 
     let mut images = vec![];
 
-    let server = "http://api.bumzack.at";
+    let server = "http://varnish.bumzack.at";
     let mut id = 1;
     for path in paths {
         let buf = path.path();
@@ -80,6 +80,7 @@ pub async fn get_images() -> utils::Result<impl Reply> {
                 id,
                 timestamp: convert_from_filename(filename),
             };
+            println!("image {:?}", &image);
             id += 1;
             images.push(image);
         }

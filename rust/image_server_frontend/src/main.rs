@@ -55,6 +55,9 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
                                         p(class="card-text") {
                                             (x.prompt)
                                         }
+                                        p(class="card-text") {
+                                          "Created: " (x.created_at)
+                                        }
                                     }
                                 }
                                 }
