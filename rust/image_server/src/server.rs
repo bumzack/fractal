@@ -3,6 +3,7 @@ use std::fs::{read_dir, DirEntry};
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use log::info;
+use warp::http::StatusCode;
 use warp::reply::json;
 use warp::{Filter, Reply};
 
@@ -49,7 +50,12 @@ pub fn routes() -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection>
                 }
             });
 
-    images.or(image).or(frontend)
+    let head = warp::head().and(warp::path::end()).map(|| {
+        info!("/   HEAD  request");
+        warp::reply::with_status("ok", StatusCode::OK)
+    });
+
+    images.or(image).or(frontend).or(head)
 }
 
 pub async fn get_images() -> utils::Result<impl Reply> {
