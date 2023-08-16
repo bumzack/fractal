@@ -5,6 +5,9 @@ public class Color {
     int g;
     int b;
 
+    public Color() {
+    }
+
     public static Color from(int r, int g, int b) {
         final var c = new Color();
         c.r = r;
@@ -35,9 +38,6 @@ public class Color {
 
     public void setB(final int b) {
         this.b = b;
-    }
-
-    public Color() {
     }
 
     @Override

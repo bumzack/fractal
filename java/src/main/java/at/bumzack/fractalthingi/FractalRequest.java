@@ -2,13 +2,14 @@ package at.bumzack.fractalthingi;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.gson.annotations.SerializedName;
 
 public class FractalRequest {
-    ComplexNumber z1;
-    ComplexNumber z2;
+    ComplexNumber center;
     int width;
+    int height;
 
+    @JsonProperty("complex_width")
+    double complexWidth;
     @JsonProperty("max_iterations")
     int maxIterations;
 
@@ -20,23 +21,20 @@ public class FractalRequest {
     @JsonProperty("y_tiles")
     int yTiles;
 
+
+    double zoom;
+    String name;
+
+
     public FractalRequest() {
     }
 
-    public ComplexNumber getZ1() {
-        return z1;
+    public ComplexNumber getCenter() {
+        return center;
     }
 
-    public void setZ1(final ComplexNumber z1) {
-        this.z1 = z1;
-    }
-
-    public ComplexNumber getZ2() {
-        return z2;
-    }
-
-    public void setZ2(final ComplexNumber z2) {
-        this.z2 = z2;
+    public void setCenter(final ComplexNumber center) {
+        this.center = center;
     }
 
     public int getWidth() {
@@ -45,6 +43,22 @@ public class FractalRequest {
 
     public void setWidth(final int width) {
         this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(final int height) {
+        this.height = height;
+    }
+
+    public double getComplexWidth() {
+        return complexWidth;
+    }
+
+    public void setComplexWidth(final double complexWidth) {
+        this.complexWidth = complexWidth;
     }
 
     public int getMaxIterations() {
@@ -77,5 +91,37 @@ public class FractalRequest {
 
     public void setyTiles(final int yTiles) {
         this.yTiles = yTiles;
+    }
+
+    public double getZoom() {
+        return zoom;
+    }
+
+    public void setZoom(final double zoom) {
+        this.zoom = zoom;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "FractalRequest{" +
+                "center=" + center +
+                ", width=" + width +
+                ", height=" + height +
+                ", complexWidth=" + complexWidth +
+                ", maxIterations=" + maxIterations +
+                ", colors=" + colors +
+                ", xTiles=" + xTiles +
+                ", yTiles=" + yTiles +
+                ", zoom=" + zoom +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

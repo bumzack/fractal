@@ -4,7 +4,6 @@ use warp::Filter;
 
 use crate::server::routes;
 
-mod fractal;
 mod server;
 mod utils;
 

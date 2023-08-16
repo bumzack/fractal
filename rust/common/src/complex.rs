@@ -5,8 +5,8 @@ use serde_derive::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Clone, PartialEq)]
 pub struct ComplexNumber {
-    pub a: f32,
-    pub b: f32,
+    pub a: f64,
+    pub b: f64,
 }
 
 impl Add for ComplexNumber {
@@ -40,7 +40,7 @@ impl ComplexNumber {
         }
     }
 
-    pub fn length_squared(&self) -> f32 {
+    pub fn length_squared(&self) -> f64 {
         self.a.powi(2) + self.b.powi(2)
     }
 }

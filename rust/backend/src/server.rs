@@ -9,18 +9,18 @@ use warp::reply::json;
 use warp::ws::{Message, WebSocket};
 
 use common::color::Color;
+use common::complex::ComplexNumber;
+use common::fractal_calculation::{
+    calc_multi_threaded, calc_multi_threaded_crossbeam_tiles, calc_rayon, calc_single_threaded,
+};
 use common::fractal_image::FractalImage;
 use common::image_tile::TileData;
 use common::models::{
     FractalRequest, FractalResponse, WebSocketCommand, WebSocketRequest, WebSocketResponse,
 };
+use common::utils::save_png2;
 
-use crate::fractal::{
-    calc_image_height, calc_multi_threaded, calc_multi_threaded_crossbeam_tiles, calc_rayon,
-    calc_single_threaded,
-};
 use crate::utils;
-use crate::utils::save_png;
 
 pub fn routes() -> impl Filter<Extract=(impl Reply, ), Error=warp::Rejection> + Clone {
     let server_source = warp::path!("api" / "singlethreaded");
@@ -63,13 +63,21 @@ pub fn routes() -> impl Filter<Extract=(impl Reply, ), Error=warp::Rejection> + 
 }
 
 pub async fn handle_request_single_threaded(req: FractalRequest) -> utils::Result<impl Reply> {
-    let (fractal, duration) =
-        calc_single_threaded(&req.z1, &req.z2, req.width, req.max_iterations, req.colors);
+    let (fractal, duration) = calc_single_threaded(
+        &req.center,
+        req.complex_width,
+        req.zoom,
+        req.width,
+        req.height,
+        req.max_iterations,
+        req.colors,
+        req.name,
+    );
 
     let response = FractalResponse {
         duration_calculation: format!("calculation single threaded took {:0.2} ms", duration),
-        duration_ms: duration,
         fractal,
+        duration_ms: duration,
     };
     let res = json(&response);
 
@@ -78,8 +86,16 @@ pub async fn handle_request_single_threaded(req: FractalRequest) -> utils::Resul
 }
 
 pub async fn handle_request_multi_threaded(req: FractalRequest) -> utils::Result<impl Reply> {
-    let (fractal, duration, cores) =
-        calc_multi_threaded(&req.z1, &req.z2, req.width, req.max_iterations, req.colors);
+    let (fractal, duration, cores) = calc_multi_threaded(
+        &req.center,
+        req.complex_width,
+        req.zoom,
+        req.width,
+        req.height,
+        req.max_iterations,
+        req.colors,
+        req.name,
+    );
 
     let response = FractalResponse {
         duration_calculation: format!(
@@ -99,11 +115,19 @@ pub async fn handle_request_multi_threaded(req: FractalRequest) -> utils::Result
 }
 
 pub async fn handle_request_rayon(req: FractalRequest) -> utils::Result<impl Reply> {
-    let (fractal, duration) =
-        calc_rayon(&req.z1, &req.z2, req.width, req.max_iterations, req.colors);
+    let (fractal, duration) = calc_rayon(
+        &req.center,
+        req.complex_width,
+        req.zoom,
+        req.width,
+        req.height,
+        req.max_iterations,
+        req.colors,
+        req.name,
+    );
 
     let response = FractalResponse {
-        duration_calculation: format!("calculation  rayon threaded took {:0.2} ms", duration),
+        duration_calculation: format!("calculation  rayon threaded took {:0.2} ms", duration, ),
         fractal,
         duration_ms: duration,
     };
@@ -123,64 +147,7 @@ async fn handle_request_crossbeam_tiles(ws: WebSocket) {
     let w = websocket_rx.next().await.unwrap();
     let (sender_crossbeam_channel, recv_crossbeam_channel) = unbounded::<TileData>();
 
-    match w {
-        Ok(msg) => {
-            if msg.is_text() {
-                let txt = msg.to_str().unwrap();
-                info!("got a text message '{}'", txt);
-
-                let web_socket_request: serde_json::error::Result<WebSocketRequest> =
-                    serde_json::from_str(txt);
-
-                if let Ok(req) = web_socket_request {
-                    info!("got a web_socket_request    {:?}", &req);
-
-                    match req.command {
-                        WebSocketCommand::GETHEIGHT(fractal_request) => {
-                            let start = Instant::now();
-
-                            info!(
-                                "client wants to the height a web_socket_request    {:?}",
-                                &fractal_request
-                            );
-
-                            let height = calc_image_height(
-                                fractal_request.width,
-                                &fractal_request.z1,
-                                &fractal_request.z2,
-                            );
-
-                            let response = WebSocketResponse {
-                                height: Some(height),
-                                tile: None,
-                            };
-                            let json = serde_json::to_string(&response).unwrap();
-                            let msg = Message::text(&json);
-                            let dur = start.elapsed().as_millis();
-                            info!("wrapping in message took: {} ms", dur);
-
-                            websocket_tx
-                                .send(msg)
-                                .unwrap_or_else(|e| {
-                                    error!("websocket send error: {}", e);
-                                })
-                                .await;
-                        }
-                        _ => panic!("not the right request"),
-                    }
-                };
-            } else if msg.is_close() {
-                info!("got a close message '{}'", msg.to_str().unwrap());
-            } else {
-                error!("got an undefined message")
-            }
-        }
-        Err(err) => {
-            panic!("not a valid request struct   err {}", err)
-        }
-    }
-
-    let w = websocket_rx.next().await.unwrap();
+    //let w = websocket_rx.next().await.unwrap();
 
     match w {
         Ok(msg) => {
@@ -205,25 +172,20 @@ async fn handle_request_crossbeam_tiles(ws: WebSocket) {
 
                             let re = fractal_request.clone();
 
-                            let z1 = re.z1.clone();
-                            let z2 = re.z2.clone();
-                            let width = re.width;
-                            let max_iterations = re.max_iterations;
-                            let colors = re.colors;
-                            let x_tiles = re.x_tiles;
-                            let y_tiles = re.y_tiles;
-
                             //  tokio thread that calls a method which produces the tiles
                             tokio::task::spawn(async move {
                                 let start = Instant::now();
                                 calc_multi_threaded_crossbeam_tiles(
-                                    &z1,
-                                    &z2,
-                                    width,
-                                    max_iterations,
-                                    colors,
-                                    x_tiles,
-                                    y_tiles,
+                                    &re.center,
+                                    re.complex_width,
+                                    re.zoom,
+                                    re.width,
+                                    re.height,
+                                    re.max_iterations,
+                                    re.colors,
+                                    re.name.clone(),
+                                    re.x_tiles,
+                                    re.y_tiles,
                                     sender_crossbeam_channel,
                                 );
                                 let dur = start.elapsed().as_millis();
@@ -236,34 +198,24 @@ async fn handle_request_crossbeam_tiles(ws: WebSocket) {
                             // tokio task which collects all tiles, sends them to the client via the websocket sender
                             // and finally saves the fractal as PNG
                             tokio::task::spawn(async move {
-                                let z1 = re.z1;
-                                let z2 = re.z2;
-                                let width = re.width;
-
-                                let x_diff = z1.a.abs() + z2.a.abs();
-                                let y_diff = z1.b.abs() + z2.b.abs();
-
-                                // x_diff : y_diff = width : height
-                                // height = x_diff*width / y_diff
-                                let height = (x_diff * width as f32 / y_diff).round() as u32;
+                                let re = fractal_request.clone();
 
                                 // let mut cnt = 1;
                                 let mut fractal_image = FractalImage {
-                                    width,
-                                    height,
-                                    pixels: vec![Color::default(); (width * height) as usize],
+                                    width: re.width,
+                                    height: re.height,
+                                    pixels: vec![Color::default(); (re.width * re.height) as usize],
                                 };
 
                                 while let Ok(tile_data) = recv_crossbeam_channel.recv() {
                                     info!("warp backend got a tile idx {}", tile_data.get_idx());
 
                                     tile_data.get_points().iter().for_each(|p| {
-                                        let idx = (p.get_y() * width + p.get_x()) as usize;
+                                        let idx = (p.get_y() * re.width + p.get_x()) as usize;
                                         fractal_image.pixels[idx] = p.get_color().clone();
                                     });
                                     let start = Instant::now();
                                     let websocket_response = WebSocketResponse {
-                                        height: None,
                                         tile: Some(tile_data),
                                     };
                                     let tile_data_json = json!(websocket_response).to_string();
@@ -281,15 +233,22 @@ async fn handle_request_crossbeam_tiles(ws: WebSocket) {
                                         .await;
                                     // cnt += 1;
                                 }
+                                let tl = ComplexNumber::default();
+                                let br = ComplexNumber::default();
 
-                                save_png(
+                                save_png2(
                                     &fractal_image.pixels,
                                     fractal_image.width,
                                     fractal_image.height,
+                                    &re.center,
+                                    &tl,
+                                    &br,
+                                    re.zoom,
+                                    re.max_iterations,
+                                    re.name,
                                 );
                             });
                         }
-                        _ => panic!("not the right request"),
                     }
                 };
             } else if msg.is_close() {

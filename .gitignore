@@ -13,11 +13,16 @@ Cargo.lock
 # MSVC Windows builds of rustc generate these, which store debugging information
 *.pdb
 
-*.png
-
 **/*.json
 
 .idea
 **/dist/
 
 **/*.iml
+
+**/*.mp4
+**/*.png
+
+
+
+*.zip

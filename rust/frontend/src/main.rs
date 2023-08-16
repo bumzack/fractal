@@ -2,17 +2,18 @@ use reqwasm::http::Request;
 use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
 use wasm_bindgen::prelude::*;
-use web_sys::{CanvasRenderingContext2d, ImageData};
+use web_sys::{
+    CanvasRenderingContext2d, HtmlCanvasElement, HtmlParagraphElement, ImageData, MouseEvent,
+};
 use web_sys::{ErrorEvent, MessageEvent, WebSocket};
-use web_sys::{HtmlCanvasElement, MouseEvent};
-use web_sys::HtmlParagraphElement;
 
-use common::complex::ComplexNumber;
+use common::fractal_templates::basic;
 use common::image_tile::TileData;
 use common::models::{
     FractalRequest, FractalResponse, WebSocketCommand, WebSocketRequest, WebSocketResponse,
 };
 
+#[macro_export]
 macro_rules! console_log {
     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
@@ -20,229 +21,17 @@ macro_rules! console_log {
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
+    pub fn log(s: &str);
 }
 
-#[component]
-async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
-    // wtf   ¯\_(ツ)_/¯
-
-    let _app_state = use_context::<Signal<AppState>>(cx);
-
-
-    let start_singlethreaded = move |e: MouseEvent| {
-        e.prevent_default();
-        console_log!("start_singlethreaded  clicked.   event {:?}", e.target());
-        spawn_local_scoped(cx, {
-            async move {
-                let res = post_single_threaded().await;
-                match res {
-                    Ok(response) => {
-                        console_log!("all good");
-                    }
-                    Err(e) => {
-                        console_log!("error calling server /api/singlethreaded target.  {:?}", e)
-                    }
-                }
-            }
-        });
-    };
-
-    let start_multithreaded = move |e: MouseEvent| {
-        e.prevent_default();
-        console_log!("start_multithreaded  clicked.   event {:?}", e.target());
-        spawn_local_scoped(cx, {
-            async move {
-                let res = post_multi_threaded().await;
-                match res {
-                    Ok(response) => {
-                        console_log!("all good");
-                    }
-                    Err(e) => {
-                        console_log!("error calling server /api/multithreaded target.  {:?}", e)
-                    }
-                }
-            }
-        });
-    };
-
-    let start_rayon = move |e: MouseEvent| {
-        e.prevent_default();
-        console_log!("start_rayon  clicked.   event {:?}", e.target());
-        spawn_local_scoped(cx, {
-            async move {
-                let res = post_rayon().await;
-                match res {
-                    Ok(response) => {
-                        console_log!("all good");
-                    }
-                    Err(e) => {
-                        console_log!("error calling server /api/rayon target.  {:?}", e)
-                    }
-                }
-            }
-        });
-    };
-
-    let start_crossbeam_tiled = move |e: MouseEvent| {
-        console_log!("start_crossbeam_tiled  clicked.  event {:?}", e.target());
-        spawn_local_scoped(cx, {
-            async move {
-                post_crossbeam_tiled().await;
-            }
-        });
-    };
-
-    let start_java_single = move |e: MouseEvent| {
-        console_log!("start_java_single  clicked.  event {:?}", e.target());
-        spawn_local_scoped(cx, {
-            async move {
-                let res = post_single_java().await;
-                match res {
-                    Ok(response) => {
-                        console_log!("all good");
-                    }
-                    Err(e) => {
-                        console_log!("error calling server /api/rayon target.  {:?}", e)
-                    }
-                }
-            }
-        });
-    };
-
-    let start_java_multi = move |e: MouseEvent| {
-        console_log!("start_java_multi  clicked.  event {:?}", e.target());
-        spawn_local_scoped(cx, {
-            async move {
-                let res = post_multi_java().await;
-                match res {
-                    Ok(response) => {
-                        console_log!("all good");
-                    }
-                    Err(e) => {
-                        console_log!("error calling server /api/rayon target.  {:?}", e)
-                    }
-                }
-            }
-        });
-    };
-
-    view! { cx,
-
-        div(class = "row", style ="margin-bottom: 10px;") {
-            div (class="col-12") {
-                button(class="btn btn-primary", type="button", id="singlethreaded" ,on:click=start_singlethreaded) {
-                            "Single threaded"
-                }
-
-                br {
-
-                }
-                p(id = "rust-single-threaded") {
-                    "Duration:"
-                }
-            }
-        }
-
-         div(class = "row", style ="margin-bottom: 10px;") {
-            div (class="col-12") {
-                button(class="btn btn-primary", type="button", id="multithreaded" ,on:click=start_multithreaded) {
-                        "Multi threaded"
-                }
-                br {
-
-                }
-                p(id = "rust-multi-threaded") {
-                    "Duration:"
-                }
-            }
-        }
-
-         div(class = "row", style ="margin-bottom: 10px;") {
-            div (class="col-12") {
-                 button(class="btn btn-primary", type="button", id="crossbeam", on:click=start_crossbeam_tiled) {
-                        "Crossbeam tiled"
-                 }
-                br {
-
-                }
-                p(id = "crossbeam-tiled") {
-                    "Duration:"
-                }
-            }
-        }
-
-          div(class = "row", style ="margin-bottom: 10px;") {
-            div (class="col-12") {
-                button(class="btn btn-primary", type="button", id="rayon" ,on:click=start_rayon){
-                    "Rayon"
-                }
-                br {
-
-                }
-                p(id = "rust-rayon") {
-                    "Duration:"
-                }
-            }
-        }
-
-          div(class = "row", style ="margin-bottom: 10px;") {
-            div (class="col-12") {
-                button(class="btn btn-primary", type="button", id="java_singlethreaded" ,on:click=start_java_single){
-                            "Java single threaded"
-                }
-                br {
-
-                }
-                p(id = "java-single-threaded") {
-                    "Duration:"
-                }
-            }
-        }
-
-          div(class = "row", style ="margin-bottom: 10px;") {
-            div (class="col-12") {
-                 button(class="btn btn-primary", type="button", id="java_multithreaded" ,on:click=start_java_multi){
-                            "Java multi threaded"
-                }
-                br {
-
-                }
-                p(id = "java-multi-threaded") {
-                    "Duration:"
-                }
-            }
-        }
-    }
-}
-
-#[component]
-async fn Header<G: Html>(cx: Scope<'_>) -> View<G> {
-    view! { cx,
-        header(class = "py-3 mb-3 border-bottom") {
-            div(class = "container-fluid d-grid gap-3 align-items-center", style ="grid-template-columns: 1fr 2fr;") {
-                span(class="navbar-brand mb-0 h1") {
-                    "FractalThingi"
-                }
-            }
-        }
-    }
-}
-
-const SERVER: &str = "http://localhost:3000";
-const API_URL_SINGLE_THREADED: &str = "/api/singlethreaded";
-const API_URL_MULTI_THREADED: &str = "/api/multithreaded";
-const API_URL_RAYON: &str = "/api/rayon";
-
-const JAVA_SERVER: &str = "http://localhost:4000";
-
-fn draw_to_canvas(
+pub fn draw_to_canvas(
     fractal_response: &FractalResponse,
     context: &CanvasRenderingContext2d,
     canvas: &HtmlCanvasElement,
 ) {
     let width = fractal_response.fractal.width;
     let height = fractal_response.fractal.height;
+    console_log!("width {}   height {}", width, height);
 
     set_canvas_width_height(width, height, canvas);
 
@@ -257,6 +46,7 @@ fn draw_to_canvas(
         width,
         height
     );
+
     let mut data = image_data.data();
     for x in 0..width {
         for y in 0..height {
@@ -273,14 +63,14 @@ fn draw_to_canvas(
             .unwrap();
     let res = context.put_image_data(&data, 0.0, 0.0);
     match res {
-        Ok(r) => console_log!("writing data successful"),
+        Ok(_) => console_log!("writing data successful"),
         Err(e) => console_log!("error writing image data {:?}", e),
     }
 
     console_log!("updated data");
 }
 
-fn draw_to_canvas_tiles(
+pub fn draw_to_canvas_tiles(
     tile: &TileData,
     context: &CanvasRenderingContext2d,
     width: u32,
@@ -316,24 +106,24 @@ fn draw_to_canvas_tiles(
             .unwrap();
     let res = context.put_image_data(&data, 0.0, 0.0);
     match res {
-        Ok(r) => console_log!("writing data form tile successfull "),
+        Ok(_r) => console_log!("writing data form tile successfull "),
         Err(e) => console_log!("error writing tile image data {:?}", e),
     }
 
     console_log!("updated canvas from tile");
 }
 
-fn clear_canvas(canvas: &HtmlCanvasElement) {
+pub fn clear_canvas(canvas: &HtmlCanvasElement) {
     canvas.set_width(0);
     canvas.set_height(0);
 }
 
-fn set_canvas_width_height(width: u32, height: u32, canvas: &HtmlCanvasElement) {
+pub fn set_canvas_width_height(width: u32, height: u32, canvas: &HtmlCanvasElement) {
     canvas.set_width(width);
     canvas.set_height(height);
 }
 
-fn get_canvas_context() -> (CanvasRenderingContext2d, HtmlCanvasElement) {
+pub fn get_canvas_context() -> (CanvasRenderingContext2d, HtmlCanvasElement) {
     let document = web_sys::window().unwrap().document().unwrap();
     let canvas = document.get_element_by_id("fractal_canvas").unwrap();
     let canvas: HtmlCanvasElement = canvas
@@ -351,6 +141,31 @@ fn get_canvas_context() -> (CanvasRenderingContext2d, HtmlCanvasElement) {
     let canvas = context.canvas().unwrap();
     (context, canvas)
 }
+
+pub fn set_info_text(fractal_response: FractalResponse, id: &str) {
+    console_log!("trying to find element id {id}");
+    let document = web_sys::window().unwrap().document().unwrap();
+    let p = document.get_element_by_id(id).unwrap();
+    let p: HtmlParagraphElement = p
+        .dyn_into::<HtmlParagraphElement>()
+        .map_err(|_| ())
+        .unwrap();
+
+    let pixels_per_msec = (fractal_response.fractal.height * fractal_response.fractal.width) as f64
+        / fractal_response.duration_ms as f64;
+    let txt = format!(
+        "Duration: {} ms, Speed: {:.4} Pixels / ms",
+        fractal_response.duration_ms, pixels_per_msec
+    );
+    p.set_inner_text(&txt);
+}
+
+const SERVER: &str = "http://localhost:3000";
+const API_URL_SINGLE_THREADED: &str = "/api/singlethreaded";
+const API_URL_MULTI_THREADED: &str = "/api/multithreaded";
+const API_URL_RAYON: &str = "/api/rayon";
+
+const JAVA_SERVER: &str = "http://localhost:4000";
 
 async fn post_single_threaded() -> Result<(), reqwasm::Error> {
     console_log!("post_single_threaded!");
@@ -377,6 +192,7 @@ async fn post_single_threaded() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("updated data");
+
     set_info_text(fractal_response, "rust-single-threaded");
     Ok(())
 }
@@ -388,6 +204,7 @@ async fn post_multi_threaded() -> Result<(), reqwasm::Error> {
 
     let fractal_request = dummy_request();
     let fractal_request = serde_json::json!(fractal_request).to_string();
+    console_log!("post_multi_threaded!    {}", fractal_request);
 
     let url = format!("{}{}", SERVER, API_URL_MULTI_THREADED);
 
@@ -406,23 +223,9 @@ async fn post_multi_threaded() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("updated data");
-    //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
+
     set_info_text(fractal_response, "rust-multi-threaded");
-
     Ok(())
-}
-
-fn set_info_text(fractal_response: FractalResponse, id: &str) {
-    let document = web_sys::window().unwrap().document().unwrap();
-    let p = document.get_element_by_id(id).unwrap();
-    let p: HtmlParagraphElement = p
-        .dyn_into::<HtmlParagraphElement>()
-        .map_err(|_| ())
-        .unwrap();
-
-    let pixels_per_msec = (fractal_response.fractal.height * fractal_response.fractal.width) as f64 / fractal_response.duration_ms as f64;
-    let txt = format!("Dur: {} ms, {:.4} Pixels / ms", fractal_response.duration_ms, pixels_per_msec);
-    p.set_inner_text(&txt);
 }
 
 async fn post_rayon() -> Result<(), reqwasm::Error> {
@@ -450,8 +253,6 @@ async fn post_rayon() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("updated data");
-    //  let _ = context.put_image_data(&image_data, 0.0, 0.0);
-
     set_info_text(fractal_response, "rust-rayon");
     Ok(())
 }
@@ -481,7 +282,6 @@ async fn post_single_java() -> Result<(), reqwasm::Error> {
     let fractal_response = fractal_response.unwrap();
     draw_to_canvas(&fractal_response, &context, &canvas);
     console_log!("image data written to canvas");
-
     set_info_text(fractal_response, "java-single-threaded");
     Ok(())
 }
@@ -515,6 +315,35 @@ async fn post_multi_java() -> Result<(), reqwasm::Error> {
     Ok(())
 }
 
+async fn post_multi_java_virtual() -> Result<(), reqwasm::Error> {
+    console_log!("post_multi_java_virtual!");
+
+    let (context, canvas) = get_canvas_context();
+    clear_canvas(&canvas);
+
+    let fractal_request = dummy_request();
+    let fractal_request = serde_json::json!(fractal_request).to_string();
+    let url = format!("{}{}/{}", JAVA_SERVER, API_URL_MULTI_THREADED, "virtual");
+
+    let re = Request::post(&url)
+        .body(fractal_request)
+        .header("content-type", "application/json")
+        .send()
+        .await?
+        .text()
+        .await;
+
+    let response = re.expect("should be a valid Response/Body !!!");
+    let fractal_response: serde_json::error::Result<FractalResponse> =
+        serde_json::from_str(&response);
+
+    let fractal_response = fractal_response.unwrap();
+    draw_to_canvas(&fractal_response, &context, &canvas);
+    console_log!("image data written to canvas");
+    set_info_text(fractal_response, "java-multi-threaded-virtual");
+    Ok(())
+}
+
 async fn post_crossbeam_tiled() {
     console_log!("post_crossbeam_tiled!");
 
@@ -528,17 +357,19 @@ async fn post_crossbeam_tiled() {
         Err(e) => panic!("cant open websocket    err {:?}", e),
     };
 
-    let socket_clone = socket.clone();
+    // let socket_clone = socket.clone();
     let fractal_request = dummy_request();
     let width = fractal_request.width;
-    let mut height = 0;
-    let mut cnt_height = 0;
+    let height = fractal_request.height;
+    set_canvas_width_height(width, height, &canvas);
+
     let mut cnt_tiles = 0;
+
     let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
         e.prevent_default();
 
         if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
-            console_log!("message event, received Text: {:?}", txt);
+            // console_log!("message event, received Text: {:?}", txt);
             let t = txt.as_string().unwrap();
             let web_socket_response: serde_json::error::Result<WebSocketResponse> =
                 serde_json::from_str(&t);
@@ -546,15 +377,7 @@ async fn post_crossbeam_tiled() {
             if web_socket_response.is_ok() {
                 console_log!("got a valid WebSocketResponse  {}", &t);
                 let web_socket_response = web_socket_response.unwrap();
-                console_log!("web_socket_response   {:?}", &web_socket_response);
 
-                if web_socket_response.height.is_some() {
-                    height = web_socket_response.height.unwrap();
-                    cnt_height += 1;
-                    console_log!("cnt_height   {:?}     {}", cnt_height, height);
-                    let r = fractal_request.clone();
-                    set_canvas_width_height(r.width, web_socket_response.height.unwrap(), &canvas);
-                }
                 if web_socket_response.tile.is_some() {
                     cnt_tiles += 1;
 
@@ -565,17 +388,6 @@ async fn post_crossbeam_tiled() {
                         cnt_tiles
                     );
                     draw_to_canvas_tiles(&tile, &context, width, height);
-                }
-
-                let req = WebSocketRequest {
-                    command: WebSocketCommand::RENDERFRACTAL(fractal_request.clone()),
-                };
-
-                let req = serde_json::json!(req).to_string();
-                console_log!("sending string to server {}", &req);
-                match socket_clone.send_with_str(&req) {
-                    Ok(_) => console_log!("sending request to server to start sending tiles: message successfully sent"),
-                    Err(err) => console_log!("error sending message: {:?}", err),
                 }
             } else {
                 console_log!(
@@ -604,16 +416,17 @@ async fn post_crossbeam_tiled() {
     let cloned_ws = socket.clone();
     let onopen_callback = Closure::<dyn FnMut()>::new(move || {
         console_log!("socket opened");
-        // send off text message
-        let req = dummy_request();
+
         let req = WebSocketRequest {
-            command: WebSocketCommand::GETHEIGHT(req),
+            command: WebSocketCommand::RENDERFRACTAL(fractal_request.clone()),
         };
 
         let req = serde_json::json!(req).to_string();
         console_log!("sending string to server {}", &req);
         match cloned_ws.send_with_str(&req) {
-            Ok(_) => console_log!("sending request to server: message successfully sent"),
+            Ok(_) => console_log!(
+                "sending request to server to start sending tiles: message successfully sent"
+            ),
             Err(err) => console_log!("error sending message: {:?}", err),
         }
     });
@@ -622,24 +435,12 @@ async fn post_crossbeam_tiled() {
 }
 
 fn dummy_request() -> FractalRequest {
-    FractalRequest {
-        z1: ComplexNumber { a: -2.0, b: 1.5 },
-        z2: ComplexNumber { a: 1., b: -1.5 },
-        width: 1200,
-        max_iterations: 10000,
-        colors: 256,
-        x_tiles: 30,
-        y_tiles: 30,
-    }
+    let (request, _, _) = basic(true);
+    request
 }
 
 #[component]
 async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
-    //    let app_state = use_context::<Signal<AppState>>(cx);
-
-    // , on:click=handle_save_stats
-
-
     view! { cx,
         div(class = "container-fluid") {
             div(class = "row") {
@@ -669,14 +470,234 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
     }
 }
 
-pub struct AppState {
-    name: RcSignal<String>,
+#[component]
+async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
+    let start_singlethreaded = move |e: MouseEvent| {
+        e.prevent_default();
+        console_log!("start_singlethreaded  clicked.   event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_single_threaded().await;
+                match res {
+                    Ok(_) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/singlethreaded target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    let start_multithreaded = move |e: MouseEvent| {
+        e.prevent_default();
+        console_log!("start_multithreaded  clicked.   event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_multi_threaded().await;
+                match res {
+                    Ok(_) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/multithreaded target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    let start_rayon = move |e: MouseEvent| {
+        e.prevent_default();
+        console_log!("start_rayon  clicked.   event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_rayon().await;
+                match res {
+                    Ok(_) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/rayon target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    let start_crossbeam_tiled = move |e: MouseEvent| {
+        console_log!("start_crossbeam_tiled  clicked.  event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                post_crossbeam_tiled().await;
+            }
+        });
+    };
+
+    let start_java_single = move |e: MouseEvent| {
+        console_log!("start_java_single  clicked.  event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_single_java().await;
+                match res {
+                    Ok(_) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/rayon target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    let start_java_multi = move |e: MouseEvent| {
+        console_log!("start_java_multi  clicked.  event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_multi_java().await;
+                match res {
+                    Ok(_) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/rayon target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    let start_java_multi_virtual = move |e: MouseEvent| {
+        console_log!("start_java_multi_virtual  clicked.  event {:?}", e.target());
+        spawn_local_scoped(cx, {
+            async move {
+                let res = post_multi_java_virtual().await;
+                match res {
+                    Ok(_) => {
+                        console_log!("all good");
+                    }
+                    Err(e) => {
+                        console_log!("error calling server /api/rayon target.  {:?}", e)
+                    }
+                }
+            }
+        });
+    };
+
+    view! { cx,
+
+        div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="singlethreaded" ,on:click=start_singlethreaded) {
+                    "Single threaded"
+                }
+                br {
+                }
+                p(id = "rust-single-threaded") {
+                    "Duration:"
+                }
+            }
+        }
+
+         div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="multithreaded" ,on:click=start_multithreaded) {
+                        "Multi threaded"
+                }
+                br {
+                }
+                p(id = "rust-multi-threaded") {
+                    "Duration:"
+                }
+            }
+        }
+
+         div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                 button(class="btn btn-primary", type="button", id="crossbeam", on:click=start_crossbeam_tiled) {
+                        "Crossbeam tiled"
+                 }
+                 br {
+                 }
+                 p(id = "crossbeam-tiled") {
+                    "Duration:"
+                 }
+            }
+        }
+
+          div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="rayon" ,on:click=start_rayon){
+                    "Rayon"
+                }
+                br {
+                }
+                p(id = "rust-rayon") {
+                    "Duration:"
+                }
+            }
+        }
+
+          div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                button(class="btn btn-primary", type="button", id="java_singlethreaded" ,on:click=start_java_single){
+                            "Java single threaded"
+                }
+                br {
+                }
+                p(id = "java-single-threaded") {
+                    "Duration:"
+                }
+            }
+        }
+
+        div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                 button(class="btn btn-primary", type="button", id="java_multithreaded" ,on:click=start_java_multi){
+                            "Java multi threaded"
+                }
+                br {
+                }
+                p(id = "java-multi-threaded") {
+                    "Duration:"
+                }
+            }
+        }
+
+        div(class = "row", style ="margin-bottom: 10px;") {
+            div (class="col-12") {
+                 button(class="btn btn-primary", type="button", id="java_multithreaded_virtual" ,on:click=start_java_multi_virtual){
+                            "Java multi threaded virtual"
+                }
+                br {
+                }
+                p(id = "java-multi-threaded-virtual") {
+                    "Duration:"
+                }
+            }
+        }
+    }
+}
+
+#[component]
+async fn Header<G: Html>(cx: Scope<'_>) -> View<G> {
+    view! { cx,
+        header(class = "py-3 mb-3 border-bottom") {
+            div(class = "container-fluid d-grid gap-3 align-items-center", style ="rid-template-columns: 1fr 2fr;") {
+                span(class="navbar-brand mb-0 h1") {
+                    "FractalThingi"
+                }
+            }
+        }
+    }
 }
 
 #[component]
 async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
     let app_state = AppState {
-        name: create_rc_signal("yoyo".to_string()),
+        _name: create_rc_signal("yoyo".to_string()),
     };
 
     let app_state = create_signal(cx, app_state);
@@ -699,6 +720,10 @@ async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
         }
 
     }
+}
+
+pub struct AppState {
+    _name: RcSignal<String>,
 }
 
 fn main() {

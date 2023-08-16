@@ -8,17 +8,17 @@ edition = "2021"
 [dependencies]
 warp = "0.3.5"
 pretty_env_logger = "0.5.0"
-log = "0.4.18"
-tokio = { version = "1.28.2", features = ["fs", "sync", "time"] }
+log = "0.4.19"
+tokio = { version = "1.30.0", features = ["fs", "sync", "time"] }
 lazy_static = "1.4.0"
 futures = { version = "0.3.28" }
 futures-util = { version = "0.3.28" }
 chrono = { version = "0.4.26", features = ["serde"] }
-serde = { version = "1.0.163", features = ["derive"] }
-serde_json = "1.0.96"
-serde_derive = "1.0.163"
-image = "0.24.6"
-num_cpus = "1.15.0"
+serde = { version = "1.0.183", features = ["derive"] }
+serde_json = "1.0.104"
+serde_derive = "1.0.183"
+image = "0.24.7"
+num_cpus = "1.16.0"
 rayon = "1.7.0"
 crossbeam = "0.8.2"
 crossbeam-channel = "0.5.8"
@@ -26,6 +26,6 @@ common = { path = "../common" }
 
 
 [dev-dependencies]
-tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.30.0", features = ["macros", "rt-multi-thread"] }
 futures-util = { version = "0.3.28", default-features = true }
 
