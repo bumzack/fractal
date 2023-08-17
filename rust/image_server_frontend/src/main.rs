@@ -42,9 +42,9 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
     view! { cx,
         div(class="album py-5 bg-body-tertiary") {
              div(class="container") {
-                div (class = "row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3") {
+                div (class = "row row-cols-1 row-cols-sm-2 row-cols-md-2 g-2") {
                         Keyed (
-                            iterable=  img,
+                            iterable = img,
                             view=|cx, x| view! { cx,
                               div (class = "col") {
                                 div(class="card shadow-sm") {
@@ -72,32 +72,9 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
 
 #[component]
 async fn LeftNavItems<G: Html>(cx: Scope<'_>) -> View<G> {
-    // let start_singlethreaded = move |e: MouseEvent| {
-    //     e.prevent_default();
-    //     console_log!("start_singlethreaded  clicked.   event {:?}", e.target());
-    //     spawn_local_scoped(cx, {
-    //         async move {
-    //             let res = post_single_threaded().await;
-    //             match res {
-    //                 Ok(_) => {
-    //                     console_log!("all good");
-    //                 }
-    //                 Err(e) => {
-    //                     console_log!("error calling server /api/singlethreaded target.  {:?}", e)
-    //                 }
-    //             }
-    //         }
-    //     });
-    // };
-
-    // button(class="btn btn-primary", type="button", id="singlethreaded" ,on:click=start_singlethreaded) {
-    //     "Single threaded"
-    // }
-
     view! { cx,
         div(class = "row", style ="margin-bottom: 10px;") {
             div (class="col-12") {
-
                 br {
                 }
             }
