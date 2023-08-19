@@ -4,7 +4,5 @@ members = [
     "backend",
     "frontend",
     "common",
-    "image_server",
-    "image_server_frontend"
 ]
 
