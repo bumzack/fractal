@@ -15,11 +15,11 @@ pub fn basic(debug: bool) -> (FractalRequest, f64, f64) {
     if debug {
         zoom = 0.7;
         max_iterations = 1000;
-        zoom_factor = 1.0;
+        zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 1600;
-        height = 1200;
+        width = 800;
+        height = 600;
     }
 
     let complex_width = 3.1;
