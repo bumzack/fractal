@@ -435,7 +435,7 @@ async fn post_crossbeam_tiled() {
 }
 
 fn dummy_request() -> FractalRequest {
-    let (request, _, _) = basic(true);
+    let (request, _, _) = basic(false);
     request
 }
 
