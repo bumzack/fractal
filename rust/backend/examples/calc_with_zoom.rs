@@ -10,8 +10,8 @@ use common::models::FractalRequest;
 use common::{complex::ComplexNumber, fractal_calculation::calc_multi_threaded};
 
 fn main() {
-    flower(true);
-    // tendrils(true);
+    // flower(false);
+    tendrils(true);
     // seahorse_valley(true);
     // sun(true);
     // tree(true);
@@ -133,8 +133,8 @@ fn get_filename(name: &str) -> String {
 
     let path = env!("CARGO_MANIFEST_DIR");
     // println!("CARGO_MANIFEST_DIR   {path}");
-    let path = format!("{}/../../images/{}", path, name);
+    let path = format!("{}/../../images/{}/json", path, name);
     create_dir_all(&path).expect("create dir should work");
 
-    format!("{}/{}_fractal_{}.json", path, now.timestamp_millis(), name)
+    format!("{}/{}_{}.json", path, now.timestamp_millis(), name)
 }

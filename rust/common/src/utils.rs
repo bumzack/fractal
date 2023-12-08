@@ -26,9 +26,9 @@ pub fn save_png(pixels: &[Color], width: u32, height: u32) {
     let now = Utc::now();
     let filename = format!(
         "fractal_{}_{}_{}.png",
+        now.timestamp_millis(),
         width,
         height,
-        now.timestamp_millis()
     );
     let res = image.save(filename);
     let duration = start.elapsed().as_millis();
@@ -73,17 +73,14 @@ pub fn save_png2(
     fs::create_dir_all(&path).expect("create dir should work");
 
     let filename = format!(
-        "{}/{}_fractal_{}___{}x{}_center_{}_zoom_{}_max_iter_{}_tl_{}_br_{}.png",
+        "{}/{}_{}___{}x{}_zoom_{}_max_iter_{}.png",
         path,
-        name,
         now.timestamp_millis(),
+        name,
         width,
         height,
-        c,
         zoom,
-        max_iterations,
-        tl,
-        br
+        max_iterations
     );
     let res = image.save(filename);
     let duration = start.elapsed().as_millis();

@@ -14,7 +14,7 @@ pub fn basic(debug: bool) -> (FractalRequest, f64, f64) {
 
     if debug {
         zoom = 0.7;
-        max_iterations = 1000;
+        max_iterations = 10_000;
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
@@ -44,12 +44,12 @@ pub fn basic(debug: bool) -> (FractalRequest, f64, f64) {
 
 pub fn flower(debug: bool) -> (FractalRequest, f64, f64) {
     let center = ComplexNumber {
-        a: -1.999985882,
+        a: -1.999985881222,
         b: 0.0,
     };
 
     let mut zoom = 1.0;
-    let mut max_iterations: u32 = 50_000;
+    let mut max_iterations: u32 = 100_000;
     let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
@@ -58,8 +58,8 @@ pub fn flower(debug: bool) -> (FractalRequest, f64, f64) {
 
     if debug {
         zoom = 1.0;
-        max_iterations = 1000;
-        zoom_factor = 1.2;
+        max_iterations = 10_000;
+        zoom_factor = 1.5;
         max_zoom_factor = 50_000_000.0;
 
         width = 4096;
@@ -88,12 +88,12 @@ pub fn flower(debug: bool) -> (FractalRequest, f64, f64) {
 
 pub fn tendrils(debug: bool) -> (FractalRequest, f64, f64) {
     let center = ComplexNumber {
-        a: -1.999985882,
-        b: 0.0,
+        a: -0.226266711007532 + (-0.182177734375),
+        b: 1.1161744425371 + (0.142138671875),
     };
 
     let mut zoom = 1.0;
-    let mut max_iterations: u32 = 50_000;
+    let mut max_iterations: u32 = 100_000;
     let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
@@ -106,9 +106,9 @@ pub fn tendrils(debug: bool) -> (FractalRequest, f64, f64) {
 
     if debug {
         zoom = 1.0;
-        max_iterations = 1000;
-        zoom_factor = 1.2;
-        max_zoom_factor = 50_000_000.0;
+        max_iterations = 10_000;
+        zoom_factor = 1.3;
+        max_zoom_factor = 5_000_000.0;
 
         width = 4096;
         height = 2160;
@@ -138,7 +138,7 @@ pub fn julia_island(debug: bool) -> (FractalRequest, f64, f64) {
     };
 
     let mut zoom = 1.0;
-    let mut max_iterations: u32 = 50_000;
+    let mut max_iterations: u32 = 100_000;
     let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
@@ -192,7 +192,7 @@ pub fn seahorse_valley(debug: bool) -> (FractalRequest, f64, f64) {
 
     if debug {
         zoom = 1.0;
-        max_iterations = 1000;
+        max_iterations = 10_000;
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
@@ -235,7 +235,7 @@ pub fn starfish(debug: bool) -> (FractalRequest, f64, f64) {
 
     if debug {
         zoom = 1.0;
-        max_iterations = 1000;
+        max_iterations = 10_000;
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
@@ -279,7 +279,7 @@ pub fn sun(debug: bool) -> (FractalRequest, f64, f64) {
 
     if debug {
         zoom = 1.0;
-        max_iterations = 1000;
+        max_iterations = 10_000;
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
@@ -319,7 +319,7 @@ pub fn tree(debug: bool) -> (FractalRequest, f64, f64) {
 
     if debug {
         zoom = 1.0;
-        max_iterations = 1000;
+        max_iterations = 10_000;
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
