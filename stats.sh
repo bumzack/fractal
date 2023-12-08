@@ -12,17 +12,19 @@ PAYLOAD='
     },
     "colors":256,
     "complex_width":3.1,
-    "height":600,
+    "height": 2160,
     "max_iterations":50000,
     "name":"basic",
-    "width":800,
+    "width": 3840,
     "x_tiles":10,
     "y_tiles":10,
     "zoom":0.7
 }'
 
-FILENAME="log_50000_iter.csv"
-echo "name; duration_rust_single_threaded; rust_multi_threaded; rust_rayon ; java_single_threaded; java_multi_threaded; java_multi_threaded_virtual" > $FILENAME
+FILENAME="ryzen9_log_4k_50000_iter.csv"
+
+
+echo "duration_rust_single_threaded; rust_multi_threaded; rust_rayon ; java_single_threaded; java_multi_threaded; java_multi_threaded_virtual" > $FILENAME
 
 for i in {1..${ITERATIONS}}
 do
