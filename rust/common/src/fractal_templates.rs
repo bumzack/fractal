@@ -18,8 +18,8 @@ pub fn basic(debug: bool) -> (FractalRequest, f64, f64) {
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let complex_width = 3.1;
@@ -62,8 +62,8 @@ pub fn flower(debug: bool) -> (FractalRequest, f64, f64) {
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let complex_width = 4.1;
@@ -110,8 +110,8 @@ pub fn tendrils(debug: bool) -> (FractalRequest, f64, f64) {
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let req = FractalRequest {
@@ -154,8 +154,8 @@ pub fn julia_island(debug: bool) -> (FractalRequest, f64, f64) {
         zoom_factor = 1000000.2;
         max_zoom_factor = 50_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let req = FractalRequest {
@@ -196,8 +196,8 @@ pub fn seahorse_valley(debug: bool) -> (FractalRequest, f64, f64) {
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let req = FractalRequest {
@@ -239,8 +239,8 @@ pub fn starfish(debug: bool) -> (FractalRequest, f64, f64) {
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let req = FractalRequest {
@@ -283,8 +283,8 @@ pub fn sun(debug: bool) -> (FractalRequest, f64, f64) {
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let req = FractalRequest {
@@ -323,8 +323,8 @@ pub fn tree(debug: bool) -> (FractalRequest, f64, f64) {
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let colors = 256;

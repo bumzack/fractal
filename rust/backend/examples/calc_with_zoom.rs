@@ -11,12 +11,12 @@ use common::{complex::ComplexNumber, fractal_calculation::calc_multi_threaded};
 
 fn main() {
     flower(true);
-    tendrils(true);
-    seahorse_valley(true);
-    sun(true);
-    tree(true);
-    starfish(true);
-    julia_island(true);
+    // tendrils(true);
+    // seahorse_valley(true);
+    // sun(true);
+    // tree(true);
+    // starfish(true);
+    // julia_island(true);
 }
 
 fn flower(debug: bool) {
@@ -122,7 +122,7 @@ fn render(mut req: FractalRequest, zoom_factor: f64, max_zoom_factor: f64) {
 
         let mut f = File::create(path).expect("Unable to create file");
         f.write_all(json.as_bytes()).expect("Unable to write data");
-        req.zoom = req.zoom * zoom_factor;
+        req.zoom *= zoom_factor;
     }
 
     println!("rendering took {} seconds", start.elapsed().as_secs_f64());
@@ -136,5 +136,5 @@ fn get_filename(name: &str) -> String {
     let path = format!("{}/../../images/{}", path, name);
     create_dir_all(&path).expect("create dir should work");
 
-    format!("{}/{}_fractal_{}.json", path, name, now.timestamp_millis(),)
+    format!("{}/{}_fractal_{}.json", path, now.timestamp_millis(), name)
 }
