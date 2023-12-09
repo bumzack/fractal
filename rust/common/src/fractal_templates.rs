@@ -175,7 +175,7 @@ pub fn julia_island(debug: bool) -> (FractalRequest, f64, f64) {
 
 pub fn seahorse_valley(debug: bool) -> (FractalRequest, f64, f64) {
     let center = ComplexNumber {
-        a: -0.743517833,
+        a: -0.74351784,
         b: -0.127094578,
     };
 
@@ -193,7 +193,7 @@ pub fn seahorse_valley(debug: bool) -> (FractalRequest, f64, f64) {
     if debug {
         zoom = 1.0;
         max_iterations = 10_000;
-        zoom_factor = 1.2;
+        zoom_factor = 1.5;
         max_zoom_factor = 50_000_000.0;
 
         width = 4096;

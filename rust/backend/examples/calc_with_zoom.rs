@@ -11,8 +11,8 @@ use common::{complex::ComplexNumber, fractal_calculation::calc_multi_threaded};
 
 fn main() {
     // flower(false);
-    tendrils(true);
-    // seahorse_valley(true);
+    // tendrils(true);
+    seahorse_valley(true);
     // sun(true);
     // tree(true);
     // starfish(true);
