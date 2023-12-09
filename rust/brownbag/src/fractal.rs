@@ -14,7 +14,7 @@ pub const ASCII_WHITE_BACKGROUND: &str = "\x1b[1;37;47m";
 pub const ASCII_DEFAULT_BACKGROUND: &str = "\x1b[1;39;49m";
 pub const ASCII_RESET_BACKGROUND: &str = "\x1b[1;0;0m";
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum ColorEnum {
     BLACK,
     RED,
