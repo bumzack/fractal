@@ -1,31 +1,28 @@
 use std::fmt::{Display, Formatter};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
-use crate::fractal::ColorEnum::BLACK;
-use crate::fractal::{calc_color, ColorEnum, ASCII_RESET_BACKGROUND};
+use crate::fractal::{calc_color, Color, ASCII_RESET_BACKGROUND, BLACK};
+use crate::utils::write_to_ppm;
 
 mod complex;
 mod fractal;
+mod utils;
 
 fn main() {
-    // single_threaded();
+    let width = 200;
+    let height = 160;
+    let max_iterations = 1_000;
 
-    let width = 120;
-    let height = 80;
-    let max_iterations = 10_000;
-
+    single_threaded(width, height, max_iterations);
     multi_threaded(width, height, max_iterations);
-    // single_threaded(width, height, max_iterations);
-
-    // _multi_threaded3(width, height, max_iterations);
 }
 
 fn multi_threaded(width: usize, height: usize, max_iterations: usize) {
     let start = Instant::now();
     let pixels = vec![BLACK; width * height];
-    let cores = 4;
+    let cores = 8;
     let mut threads = vec![];
     let y_global = 0;
     let y_global = Arc::new(Mutex::new(y_global));
@@ -59,8 +56,9 @@ fn multi_threaded(width: usize, height: usize, max_iterations: usize) {
                         let mut p = pixels.lock().unwrap();
                         for x in 0..width {
                             let idx = y * width + x;
-                            let pixel = row[x];
-                            p[idx] = pixel;
+                            p[idx].r = row[x].r;
+                            p[idx].g = row[x].g;
+                            p[idx].b = row[x].b;
                         }
                     }
 
@@ -86,79 +84,25 @@ fn multi_threaded(width: usize, height: usize, max_iterations: usize) {
     }
 
     let mutex = Arc::into_inner(pixels).unwrap();
-    let pixelssss = mutex.into_inner().unwrap();
+    let pixels = mutex.into_inner().unwrap();
 
     let fractal_image = FractalImage {
         width,
         height,
-        pixels: pixelssss,
+        pixels,
     };
 
     let duration = start.elapsed();
-    println!("duration {}", duration.as_millis());
-    println!("fractal image {}", fractal_image);
-}
+    println!("multi threaded duration: {} ms", duration.as_millis());
+    // println!("fractal image {}", fractal_image);
 
-fn _multi_threaded3(width: usize, height: usize, max_iterations: usize) {
-    let cores = 4;
-    let mut threads = vec![];
-
-    let mut y_global = 0;
-    // let y_global = Arc::new(Mutex::new(y_global));
-    for _ in 0..cores {
-        let mut rows_processed = 0;
-        let t = thread::spawn(move || {
-            let id = thread::current().id();
-
-            while y_global < height {
-                println!("thread {:?} is processing row {}", id, y_global);
-                y_global += 1;
-
-                rows_processed += 1;
-            }
-
-            (id, rows_processed)
-        });
-
-        threads.push(t);
-    }
-    println!("after starting the threads");
-
-    for t in threads {
-        let res = t.join();
-        match res {
-            Ok((id, rows_processed)) => {
-                println!("thread {:?} finished. rows processed {rows_processed}", id)
-            }
-            Err(e) => println!("thread returned an error {:?}", e),
-        }
-    }
-}
-
-fn _multi_threaded2() {
-    let cores = 4;
-    let mut threads = vec![];
-
-    for _ in 0..cores {
-        let t = thread::spawn(|| {
-            let id = thread::current().id();
-            println!("hi from thread {:?}", id);
-            thread::sleep(Duration::from_millis(500));
-            println!("by from thread {:?}", id);
-            // id
-        });
-
-        threads.push(t);
-    }
-    println!("after starting the threads");
-
-    for t in threads {
-        let res = t.join();
-        match res {
-            Ok(id) => println!("thread {:?} finished", id),
-            Err(e) => println!("thread returned an error {:?}", e),
-        }
-    }
+    write_to_ppm(
+        &fractal_image,
+        &format!(
+            "multi_threaded_{}x{}_max_iter_{}",
+            width, height, max_iterations
+        ),
+    );
 }
 
 fn single_threaded(width: usize, height: usize, max_iterations: usize) {
@@ -171,7 +115,9 @@ fn single_threaded(width: usize, height: usize, max_iterations: usize) {
         for x in 0..width {
             let idx = y * width + x;
             let color = calc_color(x, y, width, height, max_iterations);
-            pixels[idx] = color;
+            pixels[idx].r = color.r;
+            pixels[idx].g = color.g;
+            pixels[idx].b = color.b;
         }
         y += 1;
     }
@@ -184,16 +130,23 @@ fn single_threaded(width: usize, height: usize, max_iterations: usize) {
 
     let duration = start.elapsed();
 
-    println!("duration {}", duration.as_millis());
+    println!("single threaded duration: {} ms", duration.as_millis());
+    // println!("fractal image {}", fractal_image);
 
-    println!("fractal image {}", fractal_image);
+    write_to_ppm(
+        &fractal_image,
+        &format!(
+            "single_threaded_{}x{}_max_iter_{}",
+            width, height, max_iterations
+        ),
+    );
 }
 
 #[derive(Debug)]
-struct FractalImage {
+pub struct FractalImage {
     width: usize,
     height: usize,
-    pixels: Vec<ColorEnum>,
+    pixels: Vec<Color>,
 }
 
 impl Display for FractalImage {

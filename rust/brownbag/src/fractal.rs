@@ -1,7 +1,6 @@
 use std::fmt::{Display, Formatter};
 
 use crate::complex::ComplexNumber;
-use crate::fractal::ColorEnum::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, WHITE, YELLOW};
 
 pub const ASCII_BLACK_BACKGROUND: &str = "\x1b[1;39;40m";
 pub const ASCII_RED_BACKGROUND: &str = "\x1b[1;31;41m";
@@ -14,32 +13,35 @@ pub const ASCII_WHITE_BACKGROUND: &str = "\x1b[1;37;47m";
 pub const ASCII_DEFAULT_BACKGROUND: &str = "\x1b[1;39;49m";
 pub const ASCII_RESET_BACKGROUND: &str = "\x1b[1;0;0m";
 
-#[derive(Debug, Clone, Copy)]
-pub enum ColorEnum {
-    BLACK,
-    RED,
-    GREEN,
-    YELLOW,
-    BLUE,
-    MAGENTA,
-    CYAN,
-    WHITE,
-}
+pub const BLACK: Color = Color { r: 0, g: 0, b: 0 };
+pub const RED: Color = Color { r: 255, g: 0, b: 0 };
+pub const GREEN: Color = Color { r: 0, g: 255, b: 0 };
+pub const BLUE: Color = Color { r: 0, g: 0, b: 255 };
+pub const YELLOW: Color = Color {
+    r: 255,
+    g: 255,
+    b: 0,
+};
+pub const MAGENTA: Color = Color {
+    r: 255,
+    g: 0,
+    b: 255,
+};
+pub const CYAN: Color = Color {
+    r: 0,
+    g: 255,
+    b: 255,
+};
+pub const WHITE: Color = Color { r: 0, g: 0, b: 255 };
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Color {
-    r: u8,
-    g: u8,
-    b: u8,
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
 }
 
-pub fn calc_color(
-    x: usize,
-    y: usize,
-    width: usize,
-    height: usize,
-    max_iterations: usize,
-) -> ColorEnum {
+pub fn calc_color(x: usize, y: usize, width: usize, height: usize, max_iterations: usize) -> Color {
     let complex_width = 3.1;
     let zoom = 0.7;
     let complex_width = complex_width / zoom;
@@ -56,12 +58,7 @@ pub fn calc_color(
 
     let x_delta = (re_max - re_min) / width as f64;
     let y_delta = (img_max - img_min) / height as f64;
-
-    // println!("re_min {re_min}, re_max {re_max},  img_min {img_min}   img_max {img_max}  x_delta {x_delta}  y_delta  {y_delta} ");
-    // println!("x_delta {},   y_delta {}   width {}  height {},  max_iterations {},  re_min {}, re_max {}, img_min {}, img_max {}" ,
-    //     x_delta, y_delta, width,  height, max_iterations, re_min, re_max, img_min, img_max);
-
-    let colors: Vec<ColorEnum> = vec![RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE];
+    let colors: Vec<Color> = vec![WHITE, CYAN, MAGENTA, BLUE, YELLOW, GREEN, RED];
 
     calc_fractal_color(
         x,
@@ -83,8 +80,8 @@ pub fn calc_fractal_color(
     x_delta: f64,
     y_delta: f64,
     max_iterations: usize,
-    colors: &Vec<ColorEnum>,
-) -> ColorEnum {
+    colors: &Vec<Color>,
+) -> Color {
     let mut cnt_iterations = 0;
     let c = ComplexNumber {
         a: re_min + x as f64 * x_delta,
@@ -96,36 +93,27 @@ pub fn calc_fractal_color(
         z = z.pow2() + &c;
         cnt_iterations += 1;
     }
-    //info!("z = {}, c = {} ,  cnt_iterations {}, max_iterations {}", &z, &c, cnt_iterations, max_iterations);
 
     if cnt_iterations >= max_iterations {
-        // println!(
-        //     "BLACK       z = {}, c = {} ,  cnt_iterations {}, max_iterations {}",
-        //     &z, &c, cnt_iterations, max_iterations
-        // );
         BLACK
     } else {
         let idx = cnt_iterations % colors.len();
-        let c: &ColorEnum = colors.get(idx).unwrap();
-        // println!(
-        //     "color    idx {}   z = {}, c = {:?} ,  cnt_iterations {}, max_iterations {}",
-        //     idx, &z, c, cnt_iterations, max_iterations
-        // );
-        c.clone()
+        colors.get(idx).unwrap().clone()
     }
 }
 
-impl Display for ColorEnum {
+impl Display for Color {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match *self {
             WHITE => write!(f, "{}", format!("{ASCII_WHITE_BACKGROUND}")),
             RED => write!(f, "{}", format!("{ASCII_RED_BACKGROUND}")),
             BLACK => write!(f, "{}", format!("{ASCII_BLACK_BACKGROUND}")),
-            BLUE => write!(f, "{}", format!("{ASCII_BLUE_BACKGROUND}")),
             CYAN => write!(f, "{}", format!("{ASCII_CYAN_BACKGROUND}")),
             MAGENTA => write!(f, "{}", format!("{ASCII_MAGENTA_BACKGROUND}")),
             GREEN => write!(f, "{}", format!("{ASCII_GREEN_BACKGROUND}")),
             YELLOW => write!(f, "{}", format!("{ASCII_YELLOW_BACKGROUND}")),
+            BLUE => write!(f, "{}", format!("{ASCII_BLUE_BACKGROUND}")),
+            _ => write!(f, "{}", format!("{ASCII_WHITE_BACKGROUND}")),
         }
     }
 }
