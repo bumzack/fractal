@@ -1,4 +1,3 @@
-use std::cmp::max;
 use std::fmt::{Display, Formatter};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -14,13 +13,13 @@ fn main() {
     // single_threaded();
 
     let width = 120;
-    let height = 40;
+    let height = 80;
     let max_iterations = 10_000;
 
-    //  multi_threaded(width, height, max_iterations);
+    multi_threaded(width, height, max_iterations);
     // single_threaded(width, height, max_iterations);
 
-    _multi_threaded3(width, height, max_iterations);
+    // _multi_threaded3(width, height, max_iterations);
 }
 
 fn multi_threaded(width: usize, height: usize, max_iterations: usize) {
