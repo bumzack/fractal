@@ -26,6 +26,13 @@ pub enum ColorEnum {
     WHITE,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct Color {
+    r: u8,
+    g: u8,
+    b: u8,
+}
+
 pub fn calc_color(
     x: usize,
     y: usize,

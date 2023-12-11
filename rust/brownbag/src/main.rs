@@ -85,7 +85,7 @@ fn multi_threaded(width: usize, height: usize, max_iterations: usize) {
         }
     }
 
-    let mutex = Arc::try_unwrap(pixels).unwrap();
+    let mutex = Arc::into_inner(pixels).unwrap();
     let pixelssss = mutex.into_inner().unwrap();
 
     let fractal_image = FractalImage {
