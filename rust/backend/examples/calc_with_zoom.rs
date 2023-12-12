@@ -1,22 +1,22 @@
-use std::{fs::File, io::Write, time::Instant};
 use std::fs::create_dir_all;
+use std::{fs::File, io::Write, time::Instant};
 
 use chrono::Utc;
 use serde::Serialize;
 use serde_derive::Deserialize;
 use serde_json::json;
 
-use common::{complex::ComplexNumber, fractal_calculation::calc_multi_threaded};
 use common::models::FractalRequest;
+use common::{complex::ComplexNumber, fractal_calculation::calc_multi_threaded};
 
 fn main() {
-    // flower(false);
-    // tendrils(true);
-    seahorse_valley(true);
-    // sun(true);
-    // tree(true);
-    // starfish(true);
-    // julia_island(true);
+    flower(false);
+    tendrils(false);
+    seahorse_valley(false);
+    sun(false);
+    tree(false);
+    starfish(false);
+    julia_island(false);
 }
 
 fn flower(debug: bool) {
