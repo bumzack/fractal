@@ -4,8 +4,6 @@ use std::thread;
 use std::time::Instant;
 
 use crate::created_by_ai_assistant_mpsc::created_by_ai_using_mpsc;
-use crate::created_by_ai_assistant_rayon::created_by_ai_assistant_rayon;
-use crate::created_by_ai_assistant_threads::created_by_ai_assistant_threads;
 use crate::created_by_ai_assistant_threads_work_stealing_rayon::created_by_ai_assistant_threads_work_stealing_rayon;
 use crate::fractal::{calc_color, Color, ASCII_RESET_BACKGROUND, BLACK};
 use crate::utils::write_to_ppm;
