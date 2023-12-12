@@ -116,6 +116,8 @@ dependencies = [
 name = "brownbag"
 version = "0.1.0"
 dependencies = [
+ "crossbeam",
+ "crossbeam-channel",
  "num-complex",
  "num_cpus",
  "rayon",

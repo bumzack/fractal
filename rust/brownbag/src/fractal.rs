@@ -124,3 +124,28 @@ impl Display for Color {
         }
     }
 }
+
+
+#[derive(Debug)]
+pub struct FractalImage {
+    pub(crate) width: usize,
+    pub(crate) height: usize,
+    pub(crate) pixels: Vec<Color>,
+}
+
+impl Display for FractalImage {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut res = String::new();
+        res = format!("{}\n", res);
+        for y in 0..self.height {
+            for x in 0..self.width {
+                let idx = self.width * y + x;
+                // write space
+                res = format!("{}{} ", res, self.pixels[idx]);
+            }
+            res = format!("{}{} \n", res, ASCII_RESET_BACKGROUND, );
+        }
+        write!(f, "{}", res)
+    }
+}
+

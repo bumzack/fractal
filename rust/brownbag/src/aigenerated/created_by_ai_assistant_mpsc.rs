@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::Write;
-use std::sync::{mpsc, Arc, Mutex};
+use std::sync::mpsc;
 use std::thread;
 use std::time::Instant;
 
@@ -105,7 +105,7 @@ fn write_to_ppm(fractal_image: &Vec<Vec<Pixel>>, width: usize, height: usize, fi
                         "{} {} {} ",
                         fractal_image[y][x].r, fractal_image[y][x].g, fractal_image[y][x].b
                     )
-                    .as_ref(),
+                        .as_ref(),
                 )
                 .expect("Unable to write pixel to file");
 

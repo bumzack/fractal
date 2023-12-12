@@ -1,6 +1,7 @@
-use num_complex::Complex;
-use std::sync::{mpsc, Arc};
+use std::sync::mpsc;
 use std::thread;
+
+use num_complex::Complex;
 
 struct Pixel {
     r: u8,

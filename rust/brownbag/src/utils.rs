@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::Write;
 
-use crate::FractalImage;
+use crate::fractal::FractalImage;
 
 pub fn write_to_ppm(fractal_image: &FractalImage, filename: &str) {
     let full_path = format!("{}/{}.ppm", env!("CARGO_MANIFEST_DIR"), filename);
