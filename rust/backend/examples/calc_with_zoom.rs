@@ -1,13 +1,13 @@
-use std::fs::create_dir_all;
 use std::{fs::File, io::Write, time::Instant};
+use std::fs::create_dir_all;
 
 use chrono::Utc;
 use serde::Serialize;
 use serde_derive::Deserialize;
 use serde_json::json;
 
-use common::models::FractalRequest;
 use common::{complex::ComplexNumber, fractal_calculation::calc_multi_threaded};
+use common::models::FractalRequest;
 
 fn main() {
     flower(false);
