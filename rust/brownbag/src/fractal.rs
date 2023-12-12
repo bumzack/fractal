@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter};
 
 use crate::complex::ComplexNumber;
+use crate::palette::get_palette;
 
 pub const ASCII_BLACK_BACKGROUND: &str = "\x1b[1;39;40m";
 pub const ASCII_RED_BACKGROUND: &str = "\x1b[1;31;41m";
@@ -32,7 +33,11 @@ pub const CYAN: Color = Color {
     g: 255,
     b: 255,
 };
-pub const WHITE: Color = Color { r: 0, g: 0, b: 255 };
+pub const WHITE: Color = Color {
+    r: 255,
+    g: 255,
+    b: 255,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Color {
@@ -58,7 +63,9 @@ pub fn calc_color(x: usize, y: usize, width: usize, height: usize, max_iteration
 
     let x_delta = (re_max - re_min) / width as f64;
     let y_delta = (img_max - img_min) / height as f64;
-    let colors: Vec<Color> = vec![WHITE, CYAN, MAGENTA, BLUE, YELLOW, GREEN, RED];
+    // let colors: Vec<Color> = vec![WHITE, CYAN, MAGENTA, BLUE, YELLOW, GREEN, RED];
+
+    let colors = get_palette();
 
     calc_fractal_color(
         x,

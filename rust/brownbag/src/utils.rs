@@ -8,29 +8,31 @@ pub fn write_to_ppm(fractal_image: &FractalImage, filename: &str) {
     let mut file = File::create(full_path).expect("cant create file");
 
     let data = "P3\n";
-    file.write(data.as_ref()).expect("Unable to write file");
+    let _ = file.write(data.as_ref()).expect("Unable to write file");
     let data = format!("{} {}\n", fractal_image.width, fractal_image.height);
-    file.write(data.as_ref()).expect("Unable to write file");
+    let _ = file.write(data.as_ref()).expect("Unable to write file");
     let data = format!("255\n");
-    file.write(data.as_ref()).expect("Unable to write file");
+    let _ = file.write(data.as_ref()).expect("Unable to write file");
 
     for y in 0..fractal_image.height {
         for x in 0..fractal_image.width {
             let idx = y * fractal_image.width + x;
-            file.write(
-                format!(
-                    "{} {} {} ",
-                    fractal_image.pixels[idx].r,
-                    fractal_image.pixels[idx].g,
-                    fractal_image.pixels[idx].b
+            let _ = file
+                .write(
+                    format!(
+                        "{} {} {} ",
+                        fractal_image.pixels[idx].r,
+                        fractal_image.pixels[idx].g,
+                        fractal_image.pixels[idx].b
+                    )
+                    .as_ref(),
                 )
-                .as_ref(),
-            )
-            .expect("Unable to write pixel to file");
+                .expect("Unable to write pixel to file");
 
             // line should not be longer than 70 characters - "255 255 255 " = 12 characters
             if (idx + 1) % 5 == 0 {
-                file.write("\n".as_ref())
+                let _ = file
+                    .write("\n".as_ref())
                     .expect("Unable to write pixel to file");
             }
         }

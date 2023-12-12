@@ -3,26 +3,52 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Instant;
 
+use crate::created_by_ai_assistant_mpsc::created_by_ai_using_mpsc;
+use crate::created_by_ai_assistant_rayon::created_by_ai_assistant_rayon;
+use crate::created_by_ai_assistant_threads::created_by_ai_assistant_threads;
+use crate::created_by_ai_assistant_threads_work_stealing_rayon::created_by_ai_assistant_threads_work_stealing_rayon;
 use crate::fractal::{calc_color, Color, ASCII_RESET_BACKGROUND, BLACK};
 use crate::utils::write_to_ppm;
 
 mod complex;
+mod created_by_ai_assistant_mpsc;
+mod created_by_ai_assistant_rayon;
+mod created_by_ai_assistant_threads;
+mod created_by_ai_assistant_threads_work_stealing_rayon;
 mod fractal;
+mod palette;
 mod utils;
 
 fn main() {
-    let width = 200;
-    let height = 160;
+    let width = 4096;
+    let height = 3072;
+    let max_iterations = 100_000;
+
+    let width = 320;
+    let height = 240;
     let max_iterations = 1_000;
 
-    single_threaded(width, height, max_iterations);
+    created_by_ai_using_mpsc(width, height, max_iterations as u32, -0.8, 0.0);
+
+    // crashes
+    // /created_by_ai_assistant_rayon(width, height, max_iterations as u32);
+
+    // crashes
+    // created_by_ai_assistant_threads();
+
+    // crashes
+    // created_by_ai_assistant_threads();
+
+    created_by_ai_assistant_threads_work_stealing_rayon();
+
+    // single_threaded(width, height, max_iterations);
     multi_threaded(width, height, max_iterations);
 }
 
 fn multi_threaded(width: usize, height: usize, max_iterations: usize) {
     let start = Instant::now();
     let pixels = vec![BLACK; width * height];
-    let cores = 8;
+    let cores = num_cpus::get();
     let mut threads = vec![];
     let y_global = 0;
     let y_global = Arc::new(Mutex::new(y_global));

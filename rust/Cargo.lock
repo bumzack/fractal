@@ -115,6 +115,11 @@ dependencies = [
 [[package]]
 name = "brownbag"
 version = "0.1.0"
+dependencies = [
+ "num-complex",
+ "num_cpus",
+ "rayon",
+]
 
 [[package]]
 name = "bumpalo"
@@ -1004,6 +1009,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a51313c5820b0b02bd422f4b44776fbf47961755c74ce64afc73bfad10226c3"
 dependencies = [
  "getrandom",
+]
+
+[[package]]
+name = "num-complex"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ba157ca0885411de85d6ca030ba7e2a83a28636056c7c699b07c8b6f7383214"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
