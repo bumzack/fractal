@@ -5,21 +5,21 @@ pub fn basic(debug: bool) -> (FractalRequest, f64, f64) {
     let center = ComplexNumber { a: -0.8, b: 0.0 };
 
     let mut zoom = 1.0;
-    let mut max_iterations: u32 = 50_000;
+    let mut max_iterations: u32 = 500_000;
     let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
-    let mut width: u32 = 4096;
-    let mut height: u32 = 2160;
+    let mut width: u32 = 4096 * 2;
+    let mut height: u32 = 3072 * 2;
 
     if debug {
         zoom = 0.7;
-        max_iterations = 1000;
+        max_iterations = 10_000;
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let complex_width = 3.1;
@@ -44,26 +44,26 @@ pub fn basic(debug: bool) -> (FractalRequest, f64, f64) {
 
 pub fn flower(debug: bool) -> (FractalRequest, f64, f64) {
     let center = ComplexNumber {
-        a: -1.999985882,
+        a: -1.999985881222,
         b: 0.0,
     };
 
-    let mut zoom = 1.0;
-    let mut max_iterations: u32 = 50_000;
+    let mut zoom = 16969081.0;
+    let mut max_iterations: u32 = 50_000_000;
     let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
-    let mut width: u32 = 4096;
-    let mut height: u32 = 2160;
+    let mut width: u32 = 4096 * 2;
+    let mut height: u32 = 3072 * 2;
 
     if debug {
         zoom = 1.0;
-        max_iterations = 1000;
-        zoom_factor = 1.2;
+        max_iterations = 10_000;
+        zoom_factor = 1.5;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let complex_width = 4.1;
@@ -88,30 +88,30 @@ pub fn flower(debug: bool) -> (FractalRequest, f64, f64) {
 
 pub fn tendrils(debug: bool) -> (FractalRequest, f64, f64) {
     let center = ComplexNumber {
-        a: -1.999985882,
-        b: 0.0,
+        a: -0.22626671100753,
+        b: 1.116174442537,
     };
 
     let mut zoom = 1.0;
-    let mut max_iterations: u32 = 50_000;
+    let mut max_iterations: u32 = 500_000;
     let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
-    let mut width: u32 = 4096;
-    let mut height: u32 = 2160;
+    let mut width: u32 = 4096 * 2;
+    let mut height: u32 = 3072 * 2;
 
     let complex_width = 4.1;
 
     let colors = 256;
 
     if debug {
-        zoom = 1.0;
-        max_iterations = 1000;
-        zoom_factor = 1.2;
-        max_zoom_factor = 50_000_000.0;
+        zoom = 1000.0;
+        max_iterations = 1_000;
+        zoom_factor = 1.5;
+        max_zoom_factor = 5_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096 /4;
+        height = 2160 / 4;
     }
 
     let req = FractalRequest {
@@ -138,12 +138,12 @@ pub fn julia_island(debug: bool) -> (FractalRequest, f64, f64) {
     };
 
     let mut zoom = 1.0;
-    let mut max_iterations: u32 = 50_000;
+    let mut max_iterations: u32 = 500_000;
     let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
-    let mut width: u32 = 4096;
-    let mut height: u32 = 2160;
+    let mut width: u32 = 4096 * 2;
+    let mut height: u32 = 3072 * 2;
 
     let complex_width = 4.1;
     let colors = 256;
@@ -154,8 +154,8 @@ pub fn julia_island(debug: bool) -> (FractalRequest, f64, f64) {
         zoom_factor = 1000000.2;
         max_zoom_factor = 50_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let req = FractalRequest {
@@ -175,29 +175,29 @@ pub fn julia_island(debug: bool) -> (FractalRequest, f64, f64) {
 
 pub fn seahorse_valley(debug: bool) -> (FractalRequest, f64, f64) {
     let center = ComplexNumber {
-        a: -0.743517833,
+        a: -0.74351784,
         b: -0.127094578,
     };
 
     let mut zoom = 1.0;
-    let mut max_iterations: u32 = 50_000;
+    let mut max_iterations: u32 = 500_000;
     let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
-    let mut width: u32 = 4096;
-    let mut height: u32 = 2160;
+    let mut width: u32 = 4096 * 2;
+    let mut height: u32 = 3072 * 2;
 
     let complex_width = 4.1;
     let colors = 256;
 
     if debug {
         zoom = 1.0;
-        max_iterations = 1000;
-        zoom_factor = 1.2;
+        max_iterations = 10_000;
+        zoom_factor = 1.5;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let req = FractalRequest {
@@ -223,24 +223,24 @@ pub fn starfish(debug: bool) -> (FractalRequest, f64, f64) {
     };
 
     let mut zoom = 1.0;
-    let mut max_iterations: u32 = 50_000;
+    let mut max_iterations: u32 = 500_000;
     let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
-    let mut width: u32 = 4096;
-    let mut height: u32 = 2160;
+    let mut width: u32 = 4096 * 2;
+    let mut height: u32 = 3072 * 2;
 
     let complex_width = 4.1;
     let colors = 256;
 
     if debug {
         zoom = 1.0;
-        max_iterations = 1000;
+        max_iterations = 10_000;
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let req = FractalRequest {
@@ -267,24 +267,24 @@ pub fn sun(debug: bool) -> (FractalRequest, f64, f64) {
     };
 
     let mut zoom = 1.0;
-    let mut max_iterations: u32 = 50_000;
+    let mut max_iterations: u32 = 500_000;
     let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
-    let mut width: u32 = 4096;
-    let mut height: u32 = 2160;
+    let mut width: u32 = 4096 * 2;
+    let mut height: u32 = 3072 * 2;
 
     let complex_width = 4.1;
     let colors = 256;
 
     if debug {
         zoom = 1.0;
-        max_iterations = 1000;
+        max_iterations = 10_000;
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let req = FractalRequest {
@@ -308,23 +308,23 @@ pub fn tree(debug: bool) -> (FractalRequest, f64, f64) {
         a: -1.940157343,
         b: -1. / 1250000.0,
     };
-    let mut width: u32 = 4096;
-    let mut height: u32 = 2160;
+    let mut width: u32 = 4096 * 2;
+    let mut height: u32 = 3072 * 2;
     let complex_width = 4.1;
 
     let mut zoom = 1.0;
-    let mut max_iterations: u32 = 50_000;
+    let mut max_iterations: u32 = 500_000;
     let mut zoom_factor = 1.01;
     let mut max_zoom_factor = 50_000_000_000.0;
 
     if debug {
         zoom = 1.0;
-        max_iterations = 1000;
+        max_iterations = 10_000;
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 800;
-        height = 600;
+        width = 4096;
+        height = 2160;
     }
 
     let colors = 256;

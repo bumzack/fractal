@@ -32,12 +32,12 @@ pub fn read_palette() -> HashMap<String, Vec<Color>> {
 
                         let g = color_iter.next().unwrap();
                         let g: String = g.chars().take(3).collect();
-  //                      println!("filename {filename} g {g}");
+                        //                      println!("filename {filename} g {g}");
                         let g = u16::from_str(&g).unwrap();
 
                         let b = color_iter.next().unwrap();
                         let b: String = b.chars().take(3).collect();
-    //                    println!("ilename {filename}  b {b}");
+                        //                    println!("ilename {filename}  b {b}");
                         let b = u16::from_str(&b).unwrap();
 
                         let r = if r > 255 { 255 } else { r };
@@ -52,7 +52,7 @@ pub fn read_palette() -> HashMap<String, Vec<Color>> {
 
                         colors.push(c);
                     }
-      //              println!("filename {filename}  r {r}");
+                    //              println!("filename {filename}  r {r}");
                 }
             }
             res.insert(filename.to_string().to_lowercase(), colors);

@@ -4,5 +4,6 @@ members = [
     "backend",
     "frontend",
     "common",
+    "brownbag"
 ]
 

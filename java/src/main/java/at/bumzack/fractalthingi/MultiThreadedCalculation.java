@@ -44,24 +44,24 @@ public class MultiThreadedCalculation implements Runnable {
     }
 
     public void run() {
-        System.out.println("request " + fractalRequest);
+//        System.out.println("request " + fractalRequest);
         int y = -1;
-        System.out.println("run. width " + fractalRequest.width + ", height " + height + ",  Pixels.len()" + pixels.size());
+//        System.out.println("run. width " + fractalRequest.width + ", height " + height + ",  Pixels.len()" + pixels.size());
         final var pixelsThread = new ArrayList<Color>(fractalRequest.width);
         try {
             while (yGlobal.getValue() < height) {
                 synchronized (yGlobal) {
                     if (yGlobal.getValue() < height) {
-                        System.out.println("Thread " + Thread.currentThread().threadId() + "  if (yGlobal < height)  is true   yGlobal  " + yGlobal + ", y " + y);
+//                        System.out.println("Thread " + Thread.currentThread().threadId() + "  if (yGlobal < height)  is true   yGlobal  " + yGlobal + ", y " + y);
                         y = yGlobal.getValue();
-                        System.out.println("Thread " + Thread.currentThread().threadId() + "  if (yGlobal < height)  is true   yGlobal  " + yGlobal + ", y " + y);
+//                        System.out.println("Thread " + Thread.currentThread().threadId() + "  if (yGlobal < height)  is true   yGlobal  " + yGlobal + ", y " + y);
                         yGlobal.increment();
                     } else {
-                        System.out.println("Thread " + Thread.currentThread().threadId() + "  if (yGlobal < height)  is false   yGlobal  " + yGlobal + ", y " + y);
+//                        System.out.println("Thread " + Thread.currentThread().threadId() + "  if (yGlobal < height)  is false   yGlobal  " + yGlobal + ", y " + y);
                     }
                 }
                 if (y < height) {
-                    System.out.println("Thread " + Thread.currentThread().threadId() + "   if (y < height)   is true   yGlobal  " + yGlobal + ", y " + y);
+//                    System.out.println("Thread " + Thread.currentThread().threadId() + "   if (y < height)   is true   yGlobal  " + yGlobal + ", y " + y);
                     pixelsThread.clear();
                     for (int x = 0; x < fractalRequest.width; x++) {
                         final var c = calcColor(x, y, reMin, imgMin, xDelta, yDelta, maxIterations, colors);

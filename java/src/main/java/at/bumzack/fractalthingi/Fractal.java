@@ -167,4 +167,26 @@ public class Fractal {
 
         return Pair.of(image, duration);
     }
+
+
+
+    // created by AI Assistant
+    private static final int MAX_ITERATIONS = 1000;
+
+    public int compute(int x, int y) {
+        double zx = 0;
+        double zy = 0;
+        double cx = x / 400.0 - 2; // mapping pixel coordinates to the complex plane
+        double cy = y / 400.0 - 2;
+
+        int iteration = 0;
+        while (zx * zx + zy * zy <= 4 && iteration < MAX_ITERATIONS) { // zx * zx + zy * zy <= 4 is to check if the absolute value of the complex number is less than or equal to 2
+            double tmp = zx * zx - zy * zy + cx; // real part of the complex number
+            zy = 2.0 * zx * zy + cy; // imaginary part of the complex number
+            zx = tmp;
+            iteration++;
+        }
+
+        return iteration;
+    }
 }
