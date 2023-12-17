@@ -7,11 +7,11 @@ use log::{error, info};
 use rayon::prelude::IntoParallelRefMutIterator;
 use rayon::prelude::ParallelIterator;
 
-use crate::color::{Color, color16, color256};
+use crate::color::{color16, color256, Color};
 use crate::complex::ComplexNumber;
 use crate::fractal::calc_fractal_color;
 use crate::fractal_image::FractalImage;
-use crate::image_tile::{TileData, TileDataPoint, tiles};
+use crate::image_tile::{tiles, TileData, TileDataPoint};
 use crate::palette::read_palette;
 use crate::rayon_image::Pixel;
 use crate::utils::save_png2;
@@ -181,6 +181,8 @@ pub fn calc_multi_threaded(
         let y_global = Arc::clone(&y_global);
 
         let thread_join_handle = thread::spawn(move || {
+            info!("thread  {:?} started ", thread::current().id());
+
             let start = Instant::now();
             let mut calculated_rows = 0;
             let mut y_thread = 0;
@@ -191,6 +193,7 @@ pub fn calc_multi_threaded(
                     if *y_global < height {
                         y_thread = *y_global;
                         *y_global += 1;
+                        info!("thread  {:?} handles y {y_thread} ", thread::current().id());
                     }
                 }
                 // y_global is unlocked
@@ -211,7 +214,6 @@ pub fn calc_multi_threaded(
                         pixels_thread[x as usize].g = p.g;
                         pixels_thread[x as usize].b = p.b;
                     }
-
                     {
                         let mut p = pixels.lock().unwrap();
                         for i in 0..width {
@@ -229,7 +231,7 @@ pub fn calc_multi_threaded(
 
             let duration = start.elapsed().as_millis();
             let msg = format!(
-                "hi from thread {:?} - i spent {} ms working on {} rows of the fractal",
+                "thread {:?} spent {} ms working on {} rows.",
                 thread::current().id(),
                 duration,
                 calculated_rows
@@ -240,13 +242,17 @@ pub fn calc_multi_threaded(
         threads.push(thread_join_handle);
     }
 
+    let mut joined = 0;
     for t in threads {
         let res = t.join();
         match res {
-            Ok(s) => info!(
-                "thread successfully joined with message '{}',   thread worked for {} ms on {} rows",
-                s.0, s.1,s.2
-            ),
+            Ok(s) => {
+                joined += 1;
+                info!(
+                "thread successfully joined: '{}' //  {joined}/{cores} threads finished   //   thread worked for {} ms on {} rows",
+                s.0, s.1, s.2
+            );
+            }
             Err(e) => error!("thread returned an error {:?}", e),
         }
     }
