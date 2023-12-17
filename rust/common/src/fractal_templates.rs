@@ -48,6 +48,7 @@ pub fn flower(debug: bool) -> (FractalRequest, f64, f64) {
         b: 0.0,
     };
 
+
     let mut zoom = 16969081.0;
     let mut max_iterations: u32 = 50_000_000;
     let mut zoom_factor = 1.01;
@@ -105,6 +106,7 @@ pub fn tendrils(debug: bool) -> (FractalRequest, f64, f64) {
     let colors = 256;
 
     if debug {
+ 
         zoom = 1000.0;
         max_iterations = 1_000;
         zoom_factor = 1.5;

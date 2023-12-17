@@ -142,6 +142,7 @@ fn get_filename(name: &str) -> String {
     let now = Utc::now();
 
     let path = env!("CARGO_MANIFEST_DIR");
+
     // info!("CARGO_MANIFEST_DIR   {path}");
     let path = format!("{}/../../images/{}/json", path, name);
     create_dir_all(&path).expect("create dir should work");
