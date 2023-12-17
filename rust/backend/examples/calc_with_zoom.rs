@@ -1,22 +1,30 @@
-use std::{fs::File, io::Write, time::Instant};
 use std::fs::create_dir_all;
+use std::{fs::File, io::Write, time::Instant};
 
 use chrono::Utc;
+use log::{info, LevelFilter};
+use pretty_env_logger::env_logger::{Builder, Target};
 use serde::Serialize;
 use serde_derive::Deserialize;
 use serde_json::json;
 
-use common::{complex::ComplexNumber, fractal_calculation::calc_multi_threaded};
 use common::models::FractalRequest;
+use common::{complex::ComplexNumber, fractal_calculation::calc_multi_threaded};
 
 fn main() {
-    flower(false);
-    tendrils(false);
-    seahorse_valley(false);
-    sun(false);
-    tree(false);
-    starfish(false);
-    julia_island(false);
+    let mut builder = Builder::new();
+    builder.target(Target::Stdout);
+    builder.filter_level(LevelFilter::Info);
+    builder.init();
+    //  info!("builder={:?}", builder);
+
+    // flower(false);
+    tendrils(true);
+    //seahorse_valley(false);
+    // sun(false);
+    //     tree(false);
+    //     starfish(false);
+    //     julia_island(false);
 }
 
 fn flower(debug: bool) {
@@ -85,7 +93,7 @@ fn render(mut req: FractalRequest, zoom_factor: f64, max_zoom_factor: f64) {
             req.name.to_string(),
         );
 
-        println!(
+        info!(
             "name:  {} duration {duration},   cores {cores},     zoom {}",
             req.name, req.zoom
         );
@@ -125,14 +133,16 @@ fn render(mut req: FractalRequest, zoom_factor: f64, max_zoom_factor: f64) {
         req.zoom *= zoom_factor;
     }
 
-    println!("rendering took {} seconds", start.elapsed().as_secs_f64());
+    info!("########################################################################################################");
+    info!("rendering took {} seconds", start.elapsed().as_secs_f64());
+    info!("########################################################################################################");
 }
 
 fn get_filename(name: &str) -> String {
     let now = Utc::now();
 
     let path = env!("CARGO_MANIFEST_DIR");
-    // println!("CARGO_MANIFEST_DIR   {path}");
+    // info!("CARGO_MANIFEST_DIR   {path}");
     let path = format!("{}/../../images/{}/json", path, name);
     create_dir_all(&path).expect("create dir should work");
 
