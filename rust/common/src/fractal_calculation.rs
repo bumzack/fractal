@@ -181,7 +181,7 @@ pub fn calc_multi_threaded(
         let y_global = Arc::clone(&y_global);
 
         let thread_join_handle = thread::spawn(move || {
-            info!("thread  {:?} started ", thread::current().id());
+//             info!("thread  {:?} started ", thread::current().id());
 
             let start = Instant::now();
             let mut calculated_rows = 0;
@@ -193,7 +193,7 @@ pub fn calc_multi_threaded(
                     if *y_global < height {
                         y_thread = *y_global;
                         *y_global += 1;
-                        info!("thread  {:?} handles y {y_thread} ", thread::current().id());
+//                         info!("thread  {:?} handles y {y_thread} ", thread::current().id());
                     }
                 }
                 // y_global is unlocked
@@ -237,7 +237,7 @@ pub fn calc_multi_threaded(
                 calculated_rows
             );
 
-            (msg, duration, calculated_rows)
+            (duration, calculated_rows)
         });
         threads.push(thread_join_handle);
     }
@@ -246,12 +246,10 @@ pub fn calc_multi_threaded(
     for t in threads {
         let res = t.join();
         match res {
-            Ok(s) => {
+            Ok( (duration, calculated_rows)) => {
                 joined += 1;
                 info!(
-                "thread successfully joined: '{}' //  {joined}/{cores} threads finished   //   thread worked for {} ms on {} rows",
-                s.0, s.1, s.2
-            );
+                "thread successfully joined //  {joined}/{cores} threads finished   //   thread worked for {} ms on {} rows", duration, calculated_rows);
             }
             Err(e) => error!("thread returned an error {:?}", e),
         }
