@@ -48,7 +48,6 @@ pub fn flower(debug: bool) -> (FractalRequest, f64, f64) {
         b: 0.0,
     };
 
-
     let mut zoom = 16969081.0;
     let mut max_iterations: u32 = 50_000_000;
     let mut zoom_factor = 1.01;
@@ -93,6 +92,18 @@ pub fn tendrils(debug: bool) -> (FractalRequest, f64, f64) {
         b: 1.116174442537,
     };
 
+    // 6407226.562
+    let center = ComplexNumber {
+        a: -0.22626671100758155,
+        b: 1.116174442536133,
+    };
+
+    // 6407226.562
+    let center = ComplexNumber {
+        a: -0.226266711007605,
+        b: 1.116174442536133,
+    };
+
     let mut zoom = 1.0;
     let mut max_iterations: u32 = 500_000;
     let mut zoom_factor = 1.01;
@@ -106,14 +117,13 @@ pub fn tendrils(debug: bool) -> (FractalRequest, f64, f64) {
     let colors = 256;
 
     if debug {
- 
-        zoom = 1000.0;
-        max_iterations = 1_000;
-        zoom_factor = 1.5;
-        max_zoom_factor = 5_000_000.0;
+        zoom = 6_407_226.0;
+        max_iterations = 10_000;
+        zoom_factor = 2.0;
+        max_zoom_factor = 45_000_000.0;
 
-        width = 4096 /4;
-        height = 2160 / 4;
+        width = 4096 / 8;
+        height = 2160 / 8;
     }
 
     let req = FractalRequest {

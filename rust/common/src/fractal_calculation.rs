@@ -193,7 +193,7 @@ pub fn calc_multi_threaded(
                     if *y_global < height {
                         y_thread = *y_global;
                         *y_global += 1;
-                        info!("thread  {:?} handles y {y_thread} ", thread::current().id());
+                        // info!("thread  {:?} handles y {y_thread} ", thread::current().id());
                     }
                 }
                 // y_global is unlocked
@@ -230,14 +230,14 @@ pub fn calc_multi_threaded(
             }
 
             let duration = start.elapsed().as_millis();
-            let msg = format!(
-                "thread {:?} spent {} ms working on {} rows.",
-                thread::current().id(),
-                duration,
-                calculated_rows
-            );
+            // let msg = format!(
+            //     "thread {:?} spent {} ms working on {} rows.",
+            //     thread::current().id(),
+            //     duration,
+            //     calculated_rows
+            // );
 
-            (msg, duration, calculated_rows)
+            (duration, calculated_rows)
         });
         threads.push(thread_join_handle);
     }
@@ -246,11 +246,11 @@ pub fn calc_multi_threaded(
     for t in threads {
         let res = t.join();
         match res {
-            Ok(s) => {
+            Ok((duration, calculated_rows)) => {
                 joined += 1;
                 info!(
-                "thread successfully joined: '{}' //  {joined}/{cores} threads finished   //   thread worked for {} ms on {} rows",
-                s.0, s.1, s.2
+                "thread successfully joined {joined}/{cores} threads finished  // thread worked for {} ms on {} rows",
+                duration,calculated_rows
             );
             }
             Err(e) => error!("thread returned an error {:?}", e),
@@ -258,8 +258,8 @@ pub fn calc_multi_threaded(
     }
 
     let duration = start.elapsed().as_millis();
-    let mutex = Arc::try_unwrap(pixels).unwrap();
-    let pixelssss = mutex.into_inner().unwrap();
+    let mutex = Arc::into_inner(pixels).unwrap();
+    let pixels = mutex.into_inner().unwrap();
 
     let tl = ComplexNumber {
         a: re_min,
@@ -271,7 +271,7 @@ pub fn calc_multi_threaded(
     };
 
     save_png2(
-        &pixelssss,
+        &pixels,
         width,
         height,
         &center,
@@ -285,7 +285,7 @@ pub fn calc_multi_threaded(
     let fractal = FractalImage {
         width,
         height,
-        pixels: pixelssss,
+        pixels,
     };
 
     (fractal, duration, cores)
