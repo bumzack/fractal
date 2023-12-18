@@ -95,13 +95,13 @@ pub fn tendrils(debug: bool) -> (FractalRequest, f64, f64) {
     // 6407226.562
     let center = ComplexNumber {
         a: -0.22626671100758155,
-        b: 1.116174442536133,
+        b: 1.11617444253613305,
     };
 
     // 6407226.562
     let center = ComplexNumber {
-        a: -0.226266711007605,
-        b: 1.116174442536133,
+        a: -0.2262667110076049,
+        b: 1.116174442536128,
     };
 
     let mut zoom = 1.0;
@@ -117,13 +117,13 @@ pub fn tendrils(debug: bool) -> (FractalRequest, f64, f64) {
     let colors = 256;
 
     if debug {
-        zoom = 6_407_226.0;
-        max_iterations = 10_000;
+        zoom = 6_407_226.0 * 2.0;
+        max_iterations = 5_000_000;
         zoom_factor = 2.0;
-        max_zoom_factor = 45_000_000.0;
+        max_zoom_factor = 145_000_000.0;
 
-        width = 4096 / 8;
-        height = 2160 / 8;
+        width = 4096 / 4;
+        height = 2160 / 4;
     }
 
     let req = FractalRequest {
