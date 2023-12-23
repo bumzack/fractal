@@ -1,6 +1,7 @@
+use std::time::Instant;
+
 use num_complex::Complex;
 use rayon::prelude::*;
-use std::time::Instant;
 
 #[derive(Clone, Copy)]
 struct Pixel {

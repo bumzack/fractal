@@ -10,9 +10,12 @@ use warp::ws::{Message, WebSocket};
 
 use common::color::Color;
 use common::complex::ComplexNumber;
-use common::fractal_calculation::{
-    calc_multi_threaded, calc_multi_threaded_crossbeam_tiles, calc_rayon, calc_single_threaded,
+use common::fractal_calculation_crossbeam::calc_multi_threaded_crossbeam_tiles;
+use common::fractal_calculation_multi::{
+    calc_multi_threaded, calc_multi_threaded_opt1, calc_multi_threaded_opt2,
 };
+use common::fractal_calculation_rayon::calc_rayon;
+use common::fractal_calculation_single::calc_single_threaded;
 use common::fractal_image::FractalImage;
 use common::image_tile::TileData;
 use common::models::{
@@ -41,6 +44,24 @@ pub fn routes() -> impl Filter<Extract=(impl Reply, ), Error=warp::Rejection> + 
             handle_request_multi_threaded(req)
         });
 
+    let server_source = warp::path!("api" / "multithreadedopt1");
+    let multi_threadedopt1 = server_source
+        .and(warp::post())
+        .and(warp::body::json())
+        .and_then(|req: FractalRequest| {
+            info!("POST api/multithreadedopt1  req {:?}", &req);
+            handle_request_multi_threaded_opt1(req)
+        });
+
+    let server_source = warp::path!("api" / "multithreadedopt2");
+    let multi_threadedopt2 = server_source
+        .and(warp::post())
+        .and(warp::body::json())
+        .and_then(|req: FractalRequest| {
+            info!("POST api/multithreadedopt2  req {:?}", &req);
+            handle_request_multi_threaded_opt2(req)
+        });
+
     let server_source = warp::path!("api" / "rayon");
     let multi_threaded_rayon = server_source
         .and(warp::post())
@@ -58,6 +79,8 @@ pub fn routes() -> impl Filter<Extract=(impl Reply, ), Error=warp::Rejection> + 
 
     single_threaded
         .or(multi_threaded)
+        .or(multi_threadedopt1)
+        .or(multi_threadedopt2)
         .or(multi_threaded_rayon)
         .or(multi_threaded_crossbeam_tiles)
 }
@@ -109,6 +132,64 @@ pub async fn handle_request_multi_threaded(req: FractalRequest) -> utils::Result
 
     info!(
         "calculation multi_threaded  using plain threads  took {:0.2} ms",
+        duration
+    );
+    Ok(res)
+}
+
+pub async fn handle_request_multi_threaded_opt1(req: FractalRequest) -> utils::Result<impl Reply> {
+    let (fractal, duration, cores) = calc_multi_threaded_opt1(
+        &req.center,
+        req.complex_width,
+        req.zoom,
+        req.width,
+        req.height,
+        req.max_iterations,
+        req.colors,
+        req.name,
+    );
+
+    let response = FractalResponse {
+        duration_calculation: format!(
+            "calculation  handle_request_multi_threaded_opt1 using plain threads  took {:0.2} ms using {} cores",
+            duration, cores
+        ),
+        fractal,
+        duration_ms: duration,
+    };
+    let res = json(&response);
+
+    info!(
+        "calculation handle_request_multi_threaded_opt1  using plain threads  took {:0.2} ms",
+        duration
+    );
+    Ok(res)
+}
+
+pub async fn handle_request_multi_threaded_opt2(req: FractalRequest) -> utils::Result<impl Reply> {
+    let (fractal, duration, cores) = calc_multi_threaded_opt2(
+        &req.center,
+        req.complex_width,
+        req.zoom,
+        req.width,
+        req.height,
+        req.max_iterations,
+        req.colors,
+        req.name,
+    );
+
+    let response = FractalResponse {
+        duration_calculation: format!(
+            "calculation  handle_request_multi_threaded_opt2 using plain threads  took {:0.2} ms using {} cores",
+            duration, cores
+        ),
+        fractal,
+        duration_ms: duration,
+    };
+    let res = json(&response);
+
+    info!(
+        "calculation handle_request_multi_threaded_opt2  using plain threads  took {:0.2} ms",
         duration
     );
     Ok(res)

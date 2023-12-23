@@ -89,3 +89,17 @@ pub fn save_png2(
         Err(e) => error!("error saving file {}. took {} ms", e, duration),
     }
 }
+
+pub fn print_debug(
+    width: u32,
+    height: u32,
+    zoom: f64,
+    center: &ComplexNumber,
+    complex_width: f64,
+    complex_height: f64,
+    ratio: f64,
+    max_iterations: u32,
+) {
+    info!("width {width}, height: {height}, zoom  {zoom},  complex_width {complex_width},  complex_height {complex_height}   ratio {ratio},  center {center},  max_iterations {max_iterations}");
+}
+

@@ -1,5 +1,6 @@
-use crossbeam::deque::{Injector, Steal, Worker};
 use std::sync::Arc;
+
+use crossbeam::deque::{Injector, Steal, Worker};
 
 fn worker(start_row: usize, worker: Arc<Worker<Job>>) {
     let injector = worker.clone();
