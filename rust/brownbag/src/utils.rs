@@ -25,7 +25,7 @@ pub fn write_to_ppm(fractal_image: &FractalImage, filename: &str) {
                         fractal_image.pixels[idx].g,
                         fractal_image.pixels[idx].b
                     )
-                    .as_ref(),
+                        .as_ref(),
                 )
                 .expect("Unable to write pixel to file");
 

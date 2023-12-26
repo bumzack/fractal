@@ -7,6 +7,9 @@ pub mod models;
 pub mod rayon_image;
 pub mod utils;
 
-pub mod fractal_calculation;
+pub mod fractal_calculation_crossbeam;
+pub mod fractal_calculation_multi;
+pub mod fractal_calculation_rayon;
+pub mod fractal_calculation_single;
 pub mod fractal_templates;
 pub mod palette;
