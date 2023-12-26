@@ -1,6 +1,5 @@
 use crate::multithreaded::multi_threaded;
 use crate::multithreaded_mpsc::multi_threaded_mpsc;
-use crate::singlethreaded::single_threaded;
 
 mod complex;
 mod fractal;

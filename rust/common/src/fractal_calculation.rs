@@ -7,11 +7,11 @@ use log::{error, info};
 use rayon::prelude::IntoParallelRefMutIterator;
 use rayon::prelude::ParallelIterator;
 
-use crate::color::{color16, color256, Color};
+use crate::color::{Color, color16, color256};
 use crate::complex::ComplexNumber;
 use crate::fractal::calc_fractal_color;
 use crate::fractal_image::FractalImage;
-use crate::image_tile::{tiles, TileData, TileDataPoint};
+use crate::image_tile::{TileData, TileDataPoint, tiles};
 use crate::palette::read_palette;
 use crate::rayon_image::Pixel;
 use crate::utils::save_png2;
@@ -246,7 +246,7 @@ pub fn calc_multi_threaded(
     for t in threads {
         let res = t.join();
         match res {
-            Ok( (duration, calculated_rows)) => {
+            Ok((duration, calculated_rows)) => {
                 joined += 1;
                 info!(
                 "thread successfully joined //  {joined}/{cores} threads finished   //   thread worked for {} ms on {} rows", duration, calculated_rows);
