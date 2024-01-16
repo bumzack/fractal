@@ -3,6 +3,7 @@
 SUM=0
 ITERATIONS=20
 
+
 PAYLOAD='
 {
   "center":
@@ -12,24 +13,24 @@ PAYLOAD='
     },
     "colors":256,
     "complex_width":3.1,
-    "height": 720,
-    "max_iterations":10000,
+    "height": 2160,
+    "max_iterations":50000,
     "name":"basic",
-    "width": 1280,
+    "width": 4096,
     "x_tiles":10,
     "y_tiles":10,
     "zoom":0.7
 }'
 
-FILENAME="m2_air_1280x720_10_000.csv"
+FILENAME="m1_pro_4096x2160x50_000_2.csv"
 
 
-echo "duration_rust_single_threaded; rust_multi_threaded; rust_rayon ; java_single_threaded; java_multi_threaded; java_multi_threaded_virtual" > $FILENAME
+echo " rust_multi_threaded;  rust_multi_threaded_opt1; rust_multi_threaded_opt2" > $FILENAME
 
 for i in {1..${ITERATIONS}}
 do
-  curl -X  POST 'http://localhost:3000/api/singlethreaded'  -H  "content-type: application/json"      -d $PAYLOAD    | jq     > image.json
-  DURATION_RUST_SINGLE_THREADDED=$(cat image.json | jq -r ".duration_ms")
+  # curl -X  POST 'http://localhost:3000/api/singlethreaded'  -H  "content-type: application/json"      -d $PAYLOAD    | jq     > image.json
+  # DURATION_RUST_SINGLE_THREADDED=$(cat image.json | jq -r ".duration_ms")
 
   
   curl -X  POST 'http://localhost:3000/api/multithreaded'  -H  "content-type: application/json"      -d $PAYLOAD    | jq     > image.json

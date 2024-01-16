@@ -29,7 +29,7 @@ pub fn single_threaded(width: usize, height: usize, max_iterations: usize) {
     let duration = start.elapsed();
 
     println!("single threaded duration: {} ms", duration.as_millis());
-    // println!("fractal image {}", fractal_image);
+    println!("fractal image {}", fractal_image);
 
     write_to_ppm(
         &fractal_image,

@@ -18,8 +18,8 @@ pub fn basic(debug: bool) -> (FractalRequest, f64, f64) {
         zoom_factor = 1.2;
         max_zoom_factor = 50_000_000.0;
 
-        width = 4096;
-        height = 2160;
+        width = 800;
+        height = 600;
     }
 
     let complex_width = 3.1;

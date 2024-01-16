@@ -1,5 +1,6 @@
 use crate::multithreaded::multi_threaded;
 use crate::multithreaded_mpsc::multi_threaded_mpsc;
+use crate::singlethreaded::single_threaded;
 
 mod complex;
 mod fractal;
@@ -15,11 +16,11 @@ fn main() {
     let height = 3072 * 8;
     let max_iterations = 1_000_000;
 
-    // let width = 1024;
-    // let height = 768;
-    // let max_iterations = 100;
+    let width = 80;
+    let height = 60;
+    let max_iterations = 1000;
 
-    // single_threaded(width, height, max_iterations);
+    single_threaded(width, height, max_iterations);
     multi_threaded(width, height, max_iterations);
-    multi_threaded_mpsc(width, height, max_iterations);
+    // multi_threaded_mpsc(width, height, max_iterations);
 }

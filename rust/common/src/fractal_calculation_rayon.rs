@@ -87,7 +87,10 @@ pub fn calc_rayon(
         p.color = color;
     });
 
-    let pixels: Vec<Color> = pixels.iter().map(|p| p.color.clone()).collect();
+    let pixels: Vec<Color> = pixels
+        .iter()
+        .map(|p| p.color.clone())
+        .collect();
 
     let duration = start.elapsed().as_millis();
 
